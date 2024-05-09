@@ -31,7 +31,7 @@ creating a Datproc cluster. Create your cluster **with Hail installed**.
 
 In your workspace, from the **Environments** tab, create a notebook VM environment (`Vertex AI Workbench instance`). Once it's
 running, open the link to visit it, and navigate to `~/repos/workbench-examples/dataproc`. (The
-https://github.com/DataBiosphere/workbench-examples.git has been added to the workspace as a
+https://github.com/verily-src/workbench-examples.git has been added to the workspace as a
 *referenced resource*, and that means that the repo will be automatically cloned to the notebook
 server). Open the [create_hail_cluster.ipynb](./create_hail_cluster.ipynb) notebook.
 
@@ -49,7 +49,7 @@ cluster with Hail installed via the Workbench CLI.
 Once your cluster is up, you can find the link to the on-cluster Jupyterlab server via the [Workbench web UI](https://support.workbench.verily.com/docs/how_to_guides/dataproc/) as well as via the Google Cloud Console, as described in the [create_hail_cluster.ipynb](./create_hail_cluster.ipynb) notebook.
 
 Open the JupyterLab server on the cluster, and navigate to the `~/repos/workbench-examples/dataproc` subdirectory. \
-As noted above, the https://github.com/DataBiosphere/workbench-examples.git has been added to the workspace as a *referenced resource*, and that means that the repo will be automatically cloned onto the cluster nodes.
+As noted above, the https://github.com/verily-src/workbench-examples.git has been added to the workspace as a *referenced resource*, and that means that the repo will be automatically cloned onto the cluster nodes.
 
 Click to open and run the [`annotate_significant_gwas_results_with_gnomad.ipynb`](./annotate_significant_gwas_results_with_gnomad.ipynb) notebook.
 

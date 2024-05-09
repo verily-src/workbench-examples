@@ -10,10 +10,10 @@ in [Verily Workbench](https://workbench.verily.com/), **using the Workbench CLI*
    [workspace](https://support.workbench.verily.com/docs/getting_started/web_ui/#creating-a-new-workspace),
    or identify an existing workspace that you would like to use.
 
-2. In your workspace, add a *reference* to this repo: https://github.com/DataBiosphere/workbench-examples.git as
+2. In your workspace, add a *reference* to this repo: https://github.com/verily-src/workbench-examples.git as
    described [here](https://support.workbench.verily.com/docs/how_to_guides/add_repo_to_ws/#add-git-repo-references),
    which will clone it automatically to any Workbench [cloud environment](https://support.workbench.verily.com/docs/how_to_guides/using_cloud_environments/) that you create.
-   (You can also manually run `git clone https://github.com/DataBiosphere/workbench-examples.git` from a cloud environment if need be).
+   (You can also manually run `git clone https://github.com/verily-src/workbench-examples.git` from a cloud environment if need be).
 
 3. Then, the easiest way to run these notebooks is to create a Workbench [notebook cloud
    environment](https://support.workbench.verily.com/docs/how_to_guides/using_cloud_environments/) (a `Vertex AI Workbench instance`)
