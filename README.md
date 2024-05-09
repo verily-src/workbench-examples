@@ -1,4 +1,4 @@
-# terra-axon-examples
+# workbench-examples
 
 ## Overview
 
@@ -31,15 +31,15 @@ environment to accelerate discoveries.
    workspace](https://terra-docs.api.verily.com/docs/how_to_guides/add_repo_to_ws/). Otherwise, you
    can clone it manually:
    ```sh
-   git clone https://github.com/DataBiosphere/terra-axon-examples.git
+   git clone https://github.com/DataBiosphere/workbench-examples.git
    ```
 1. Create a [cloud environment](https://terra-docs.api.verily.com/docs/reference/glossary/#cloud-environment) for yourself. Name it something like *"{your email address}-{YYYYMMDD}"*.
 1. Be sure to run the notebook
-   [workspace_setup.ipynb](https://github.com/DataBiosphere/terra-axon-examples/blob/main/workspace_setup.ipynb)
+   [workspace_setup.ipynb](https://github.com/DataBiosphere/workbench-examples/blob/main/workspace_setup.ipynb)
    first before running any other notebook files. It sets up some buckets and a BigQuery dataset
    that all the other notebooks refer to by reference and expect to exist. You only need to run this
    notebook once per workspace, though it's fine to rerun it.
 1. Run the notebook
-   [cloud_env_setup.ipynb](https://github.com/DataBiosphere/terra-axon-examples/blob/main/cloud_env_setup.ipynb)
+   [cloud_env_setup.ipynb](https://github.com/DataBiosphere/workbench-examples/blob/main/cloud_env_setup.ipynb)
    for each cloud environment that you create. It does some useful git and virtual environment
    configuration. You may find it useful to add your own environment config to this notebook as well.
