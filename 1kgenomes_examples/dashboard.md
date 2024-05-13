@@ -12,13 +12,13 @@ Then, in your new workspace, create a JupyterLab R-based cloud environment.  You
 machine size and number of CPUs. No GPUs are necessary.
 
 Click the link to open the JupyterLab server once the cloud environment is up and running. In the
-left-hand file navigator, click in to `repos/terra-axon-examples/1kgenones_examples`.  In this
+left-hand file navigator, click in to `repos/workbench-examples/1kgenones_examples`.  In this
 directory you'll see three example notebook files, described below.
 
 When you run the R examples (`R_1k_genomes.ipynb` and `1kg_analysis.ipynb` ), ensure that you select
 the R kernel. For `GWAS_experiments.ipynb`, use the Python 3 kernel.
 
-Note that this examples repo (https://github.com/DataBiosphere/terra-axon-examples.git) is added to
+Note that this examples repo (https://github.com/verily-src/workbench-examples.git) is added to
 the workspace as a "Git Repository" (see the "Environments" tab), and is automatically cloned to the
 file system of any cloud environments you create.
 

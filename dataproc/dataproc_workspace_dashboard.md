@@ -30,8 +30,8 @@ creating a Datproc cluster. Create your cluster **with Hail installed**.
 
 
 In your workspace, from the **Environments** tab, create a notebook VM environment (`Vertex AI Workbench instance`). Once it's
-running, open the link to visit it, and navigate to `~/repos/terra-axon-examples/dataproc`. (The
-https://github.com/DataBiosphere/terra-axon-examples.git has been added to the workspace as a
+running, open the link to visit it, and navigate to `~/repos/workbench-examples/dataproc`. (The
+https://github.com/verily-src/workbench-examples.git has been added to the workspace as a
 *referenced resource*, and that means that the repo will be automatically cloned to the notebook
 server). Open the [create_hail_cluster.ipynb](./create_hail_cluster.ipynb) notebook.
 
@@ -48,8 +48,8 @@ cluster with Hail installed via the Workbench CLI.
 
 Once your cluster is up, you can find the link to the on-cluster Jupyterlab server via the [Workbench web UI](https://support.workbench.verily.com/docs/how_to_guides/dataproc/) as well as via the Google Cloud Console, as described in the [create_hail_cluster.ipynb](./create_hail_cluster.ipynb) notebook.
 
-Open the JupyterLab server on the cluster, and navigate to the `~/repos/terra-axon-examples/dataproc` subdirectory. \
-As noted above, the https://github.com/DataBiosphere/terra-axon-examples.git has been added to the workspace as a *referenced resource*, and that means that the repo will be automatically cloned onto the cluster nodes.
+Open the JupyterLab server on the cluster, and navigate to the `~/repos/workbench-examples/dataproc` subdirectory. \
+As noted above, the https://github.com/verily-src/workbench-examples.git has been added to the workspace as a *referenced resource*, and that means that the repo will be automatically cloned onto the cluster nodes.
 
 Click to open and run the [`annotate_significant_gwas_results_with_gnomad.ipynb`](./annotate_significant_gwas_results_with_gnomad.ipynb) notebook.
 
@@ -61,5 +61,5 @@ With notebook `annotate_significant_gwas_results_with_gnomad.ipynb`, you can als
 
 After your cluster is created, you can submit a batch job to the cluster from any environment where [`gcloud`](https://cloud.google.com/sdk/docs/install) is installed and configured— e.g., from the on-cluster JupyterLab server, or from a Workbench notebook cloud environment. (You can also submit batch jobs from the [Cloud Console](https://console.cloud.google.com/dataproc/jobs) or install `gcloud` on your local machine). The the [`batch_job_submit.ipynb`](./batch_job_submit.ipynb) notebook describes how to do this.
 
-From a workbench Cloud Environment, navigate to the `repos/terra-axon-examples/dataproc` subdirectory.
+From a workbench Cloud Environment, navigate to the `repos/workbench-examples/dataproc` subdirectory.
 Run the [`batch_job_submit.ipynb`](./batch_job_submit.ipynb) notebook.  It will walk you through the process of creating a batch script and submitting it to the cluster.

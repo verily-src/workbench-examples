@@ -10,10 +10,10 @@ in [Verily Workbench](https://workbench.verily.com/), **using the Workbench CLI*
    [workspace](https://support.workbench.verily.com/docs/getting_started/web_ui/#creating-a-new-workspace),
    or identify an existing workspace that you would like to use.
 
-2. In your workspace, add a *reference* to this repo: https://github.com/DataBiosphere/terra-axon-examples.git as
+2. In your workspace, add a *reference* to this repo: https://github.com/verily-src/workbench-examples.git as
    described [here](https://support.workbench.verily.com/docs/how_to_guides/add_repo_to_ws/#add-git-repo-references),
    which will clone it automatically to any Workbench [cloud environment](https://support.workbench.verily.com/docs/how_to_guides/using_cloud_environments/) that you create.
-   (You can also manually run `git clone https://github.com/DataBiosphere/terra-axon-examples.git` from a cloud environment if need be).
+   (You can also manually run `git clone https://github.com/verily-src/workbench-examples.git` from a cloud environment if need be).
 
 3. Then, the easiest way to run these notebooks is to create a Workbench [notebook cloud
    environment](https://support.workbench.verily.com/docs/how_to_guides/using_cloud_environments/) (a `Vertex AI Workbench instance`)
@@ -21,8 +21,8 @@ in [Verily Workbench](https://workbench.verily.com/), **using the Workbench CLI*
    You can use the default settings
    when you create the notebook environment.  If you have added the GitHub repo reference as described in Step 2) before
    creating the cloud environment, you will find this notebook directory in the notebook server's
-   file system under `/home/jupyter/workspace` with the name you gave the GitHub referenced resource (e.g., if you named the reference `terra-axon-examples`, you will find this directory at
-   `/home/jupyter/workspace/terra-axon-examples/dataproc`).
+   file system under `/home/jupyter/workspace` with the name you gave the GitHub referenced resource (e.g., if you named the reference `workbench-examples`, you will find this directory at
+   `/home/jupyter/workspace/workbench-examples/dataproc`).
 
    **Note**: In the Workbench web UI, you will also see an option to create a `Cluster via Dataproc`
    cloud environment. As noted above, the process of cluster creation via the UI is documented
