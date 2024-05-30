@@ -7,12 +7,9 @@ Thank you for your interest in contributing to workbench-examples! We welcome co
 Contributions to this project must be accompanied by a Contributor License
 Agreement. You (or your employer) retain the copyright to your contribution,
 this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to https://cla.developers.google.com/ to see
-your current agreements on file or to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+part of the project. Review and sign our
+[Contributor License Agreement](https://docs.google.com/document/d/1Yc-z59DQKRqiqpVgHcIHC3xhfwm3DoPmpc9eFwr_J8c/edit)
+and send it to our IP team at ip@verily.com.
 
 ## How to Contribute
 
