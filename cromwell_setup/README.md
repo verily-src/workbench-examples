@@ -6,7 +6,7 @@ The notebooks in this directory show how to run workflows with [Cromwell](https:
 
 ## Getting started
 
-Run the [cromwell_examples.ipynb](https://github.com/verily-src/workbench-examples/blob/main/cromwell_setup/cromwell_examples.ipynb). This notebook shows how you can use the Cromwell engine on Terra to execute and manage workflows. Setup instructions are provided, along with examples of commands to:
+Run the [cromwell_examples.ipynb](https://github.com/verily-src/workbench-examples/blob/main/cromwell_setup/cromwell_examples.ipynb). This notebook shows how you can use the Cromwell engine in Verily Workbench to execute and manage workflows. Setup instructions are provided, along with examples of commands to:
 - submit workflows
 - check a job's status
 - list jobs
