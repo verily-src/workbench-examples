@@ -1,20 +1,5 @@
----
-categories: ["Getting Started"]
-title: "Introduction to Verily Workbench"
-linkTitle: "Product overview"
-date: 2023-05-21
-weight: 1
-source: https://docs.google.com/document/d/1oL8vTt-2CVw6mk--Dfn-Pc1ZzCZSK09L7nmHK1cfSoA/edit#
-aliases: ["/docs/overview"]
-description: >
-  Overview
----
 
-{{< toc >}}
-
-----
-
-## What is {{% et-name-full %}}?
+## What is Verily Workbench?
 Verily Workbench is a secure research environment for governing and analyzing global multimodal biomedical data. Our mission is to transform biomedical research by making the world’s most scientifically valuable data discoverable, accessible, and analyzable. We aspire to enable the next generation of secure biomedical research and set the de-facto standard for health data analysis in the world by supporting the collaborative analysis of data from many sources, organizations, and geographies, respecting regulatory and ethical policies. To realize that vision, we support the end-to-end lifecycle of data that is governed, research that is reproducible, and collaboration that is easy & secure for commercial enterprises.
 
 Verily Workbench grew out of our work supporting important scientific initiatives, including our work on the Researcher Workbench for the All of Us Research Program, in collaboration with Vanderbilt University Medical Center and others. That work led to a deep understanding of the needs of academic researchers and how to meet them, including:
@@ -36,7 +21,7 @@ With all of these features, data generating organizations, research sponsors, an
 * Enable data governance with features to **control** access, enforce policies, and monitor data {{< glossary_tooltip text="lineage" term_id="lineage" >}}.
 * Build on **collective progress** by tapping into a growing network of data sources, researchers and reproducible methods.
 
-## What are {{% et-name-full %}}'s capabilities?
+## What are Verily Workbench's capabilities?
 
 ### Multimodal Data Framework
 An increasing amount of biomedical data is being produced by different systems in a variety of volumes, velocities, and varieties. These diverse data are then stored in disconnected locations creating data silos making it very difficult for researchers to access, integrate, and analyze to create meaningful insights. The increasing amount of data is putting significant pressure on IT organizations to provide infrastructure, software, and analysis tools to meet researchers' needs.
