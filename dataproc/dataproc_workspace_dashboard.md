@@ -15,7 +15,7 @@ You can create Dataproc clusters using either the Verily Workbench web UI, or th
 
 - (Optional) In the Verily Workbench UI, click on your profile icon, then click on "My Profile". Copy the public SSH key listed there.
   Then, [add that key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) to your GitHub account. **This is not necessary to run the Dataproc example notebooks**, but will allow you to clone private repos from your workspace cloud environments.
-  [This page](https://terra-docs.api.verily.com/docs/how_to_guides/terra_ssh_key_guide/) has more detail on the process.
+  [This page](https://support.workbench.verily.com/docs/guides/cloud_environments/git_integrations/#set-up-an-ssh-key) has more detail on the process.
 
 - Then, *Duplicate* this workspace. You can do that via the 'three-dot' menu in the upper right of the workspace. Visit your new workspace to run the rest of the steps below.
 
