@@ -49,13 +49,11 @@ def list_groups(json_string):
     json_data = json.loads(json_string)
     html += "<th>NAME</th>"
     html += "<th>EMAIL</th>"
-    html += "<th>MEMBERS</th>"
     html += "<th>POLICIES</th>"
     for row in json_data:
         html += "<tr>"
         html += f"<td>{row['name']}</td>"
         html += f"<td>{row['email']}</td>"
-        html += f"<td>{row['numMembers']}</td>"
         html += f"<td>{row['currentUserPolicies'][0]}</td>"
     html += "</table>"
     return html
