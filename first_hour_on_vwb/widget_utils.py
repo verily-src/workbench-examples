@@ -40,25 +40,24 @@ def list_bq_tables(json_string):
             for table in tables:
                 all_tables.append(f"{row['projectId']}.{row['datasetId']}.{table.table_id}")
     return all_tables
-    
 
-def list_groups(json_string):
+def list_legacy_groups(json_string):
     """ List VWB groups in which user is a member in HTML table form.
     """
     html = f"""<table style='margin: 0 auto,text-align: left'>"""
     json_data = json.loads(json_string)
+    # html += "<th>ORG_ID</th>"
     html += "<th>NAME</th>"
-    html += "<th>EMAIL</th>"
-    html += "<th>POLICIES</th>"
+    html += "<th>CURRENT_USER_ROLES</th>"
     for row in json_data:
-        html += "<tr>"
-        html += f"<td>{row['name']}</td>"
-        html += f"<td>{row['email']}</td>"
-        html += f"<td>{row['currentUserPolicies'][0]}</td>"
+        if not row['orgId']:
+            html += "<tr>"
+            html += f"<td>{row['name']}</td>"
+            html += f"<td>{sorted(row['currentUserRoles'])}</td>"
     html += "</table>"
     return html
 
-def list_group_members(json_string):
+def list_legacy_group_members(json_string):
     """
     List members of a VWB group in HTML table form.
     """
@@ -67,11 +66,31 @@ def list_group_members(json_string):
     html += "<th>EMAIL</th>"
     html += "<th>POLICIES</th>"
     for row in json_data:
-        html += "<tr>"
-        html += f"<td>{row['email']}</td>"
-        html += f"<td>{row['policies'][0]}</td>"
+        if row['orgId']:
+            html += "<tr>"
+            html += f"<td>{row['email']}</td>"
+            html += f"<td>{sorted(row['policies'])}</td>"
     html += "</table>"
     return html
+
+
+def list_org_groups(json_string):
+    """ List VWB groups in which user is a member in HTML table form.
+    """
+    html = f"""<table style='margin: 0 auto,text-align: left'>"""
+    json_data = json.loads(json_string)
+    html += "<th>ORG_ID</th>"
+    html += "<th>NAME</th>"
+    html += "<th>CURRENT_USER_ROLES</th>"
+    for row in json_data:
+        if row['orgId'] != 'null':
+            html += "<tr>"
+            html += f"<td>{row['orgId']}</td>"
+            html += f"<td>{row['name']}</td>"
+            html += f"<td>{sorted(row['currentUserRoles'])}</td>"
+    html += "</table>"
+    return html
+        
 
 def list_data_collections(json_string):
     """
