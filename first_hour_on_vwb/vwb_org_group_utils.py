@@ -17,7 +17,9 @@ def get_org_linked_group_roles(org_id, group_name):
             roles_dict[role].update(get_org_linked_group_roles(item['principal']['groupOrg'], item['principal']['groupName'])["MEMBER"])   
         else:
             for role in item['roles']:
-                roles_dict[role].add(item['principal']['userEmail'])
+                if item['principal']['userEmail'] != None:
+                    roles_dict[role].add(item['principal']['userEmail'])
+
     return roles_dict
 
 def get_flat_roles_html(roles_dict):
@@ -28,7 +30,8 @@ def get_flat_roles_html(roles_dict):
     for role in roles_dict:
         html += "<tr>"
         if roles_dict[role] != set():
-            users = "\n".join(str(e) for e in sorted(roles_dict[role]))
+            print(f"role: {role}, users: {roles_dict[role]}")
+            users = ", ".join(str(e) for e in sorted(roles_dict[role]))
             html += f"<td>{role}</td>"
             html += f"<td>{users}</td>"
         else:
