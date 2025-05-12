@@ -66,10 +66,9 @@ def list_legacy_group_members(json_string):
     html += "<th>EMAIL</th>"
     html += "<th>POLICIES</th>"
     for row in json_data:
-        if row['orgId']:
-            html += "<tr>"
-            html += f"<td>{row['email']}</td>"
-            html += f"<td>{sorted(row['policies'])}</td>"
+        html += "<tr>"
+        html += f"<td>{row['email']}</td>"
+        html += f"<td>{sorted(row['policies'])}</td>"
     html += "</table>"
     return html
 
@@ -81,13 +80,13 @@ def list_org_groups(json_string):
     json_data = json.loads(json_string)
     html += "<th>ORG_ID</th>"
     html += "<th>NAME</th>"
-    html += "<th>CURRENT_USER_ROLES</th>"
+    # html += "<th>CURRENT_USER_ROLES</th>"
     for row in json_data:
         if row['orgId'] != 'null':
             html += "<tr>"
             html += f"<td>{row['orgId']}</td>"
             html += f"<td>{row['name']}</td>"
-            html += f"<td>{sorted(row['currentUserRoles'])}</td>"
+            # html += f"<td>{sorted(row['currentUserRoles'])}</td>"
     html += "</table>"
     return html
         
@@ -169,6 +168,32 @@ class DropdownInputWidget:
 
 
 @dataclass
+class BoundIntInputWidget:
+    """A styled input accepting bounded integers widget with layout.
+    """
+    default_value: int = 0
+    min_value: int = 0
+    max_value: int = 0
+    description: str = ""
+    bound_int_widget: widgets.BoundedIntText = None
+
+    def __post_init__(self):
+        self.bound_int_widget = widgets.BoundedIntText(
+            value=self.default_value,
+            min=self.min_value,
+            max=self.max_value,
+            step=1,
+            description=self.description,
+            disabled=False,
+            layout = {'width' : 'max-content'},
+            style=input_style
+        )
+
+    def get(self):
+        '''Return widget.'''
+        return self.bound_int_widget
+
+@dataclass
 class StyledButton():
     """ A styled button widget with layout.
     """
@@ -181,7 +206,7 @@ class StyledButton():
         self.button = widgets.Button(
             description=self.description,
             disabled=False,
-            layout=widgets.Layout(width='75%'),
+            layout=widgets.Layout(width='100%'),
             display='flex',
             align_items='stretch',
             button_style='',
@@ -217,6 +242,23 @@ class ShowOptionalCheckbox():
             description="Show optional parameters",
             indent=False,
             style={'background': '#D8D2EB'}
+        )
+
+    def get(self):
+        '''Return widget.'''
+        return self.checkbox
+
+
+class LongLabelCheckbox:
+    """ Creates a styled checkbox.
+    """
+    def __init__(self, description):
+        self.checkbox = widgets.Checkbox(
+            False,
+            description = description,
+            layout = {'width' : 'max-content'},
+            disabled = False,
+            indent = False
         )
 
     def get(self):
