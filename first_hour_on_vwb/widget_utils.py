@@ -46,7 +46,6 @@ def list_legacy_groups(json_string):
     """
     html = f"""<table style='margin: 0 auto,text-align: left'>"""
     json_data = json.loads(json_string)
-    # html += "<th>ORG_ID</th>"
     html += "<th>NAME</th>"
     html += "<th>CURRENT_USER_ROLES</th>"
     for row in json_data:
@@ -80,13 +79,11 @@ def list_org_groups(json_string):
     json_data = json.loads(json_string)
     html += "<th>ORG_ID</th>"
     html += "<th>NAME</th>"
-    # html += "<th>CURRENT_USER_ROLES</th>"
     for row in json_data:
         if row['orgId'] != 'null':
             html += "<tr>"
             html += f"<td>{row['orgId']}</td>"
             html += f"<td>{row['name']}</td>"
-            # html += f"<td>{sorted(row['currentUserRoles'])}</td>"
     html += "</table>"
     return html
         
@@ -254,7 +251,7 @@ class LongLabelCheckbox:
     """
     def __init__(self, description):
         self.checkbox = widgets.Checkbox(
-            False,
+            True,
             description = description,
             layout = {'width' : 'max-content'},
             disabled = False,

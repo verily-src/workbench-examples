@@ -2,6 +2,24 @@ import json
 import subprocess
 import sys
 
+def get_org_linked_group_info(org_id, group_name):
+    """
+    Return an org-linked group's description as JSON.
+    """
+    wb_command = ["wb","group","describe",f"--org={org_id}",f"--name={group_name}","--format=JSON"]
+    result = subprocess.run(wb_command,capture_output=True,text=True)
+    group_info = json.loads(result.stdout)
+    return group_info
+
+
+def expiration_duration(org_id, group_name):
+    """
+    Return the number of days until group role expiration.
+    """
+    info = get_org_linked_group_info(org_id, group_name)
+    return info['expirationDays'] if 'expirationDays' in info else 0
+
+
 def get_org_linked_group_roles(org_id, group_name):
     """
     Return a flattened mapping of users to roles for a named org-linked group and org ID.
@@ -30,7 +48,6 @@ def get_flat_roles_html(roles_dict):
     for role in roles_dict:
         html += "<tr>"
         if roles_dict[role] != set():
-            print(f"role: {role}, users: {roles_dict[role]}")
             users = ", ".join(str(e) for e in sorted(roles_dict[role]))
             html += f"<td>{role}</td>"
             html += f"<td>{users}</td>"
@@ -39,3 +56,6 @@ def get_flat_roles_html(roles_dict):
             html += f"<td>NONE</td>"
     html += "</table>"
     return html
+
+if __name__ == "__main__":
+    print(get_org_linked_group_info("verily", "emmarogge-friends"))
