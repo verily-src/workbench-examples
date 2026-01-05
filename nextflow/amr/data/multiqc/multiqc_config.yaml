@@ -1,0 +1,11 @@
+title: "AMR++ Bioinformatic pipeline"
+subtitle: "A pipeline meant to aid in the analysis of raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome."
+
+report_header_info:
+    - Contact E-mail: 'meglab.metagenomics@gmail.com'
+    - Application Type: 'AMR++'
+    - Project Type: 'FastQC analysis'
+
+custom_logo_url: 'https://www.meglab.org/'
+custom_logo_title: 'Microbial Ecology Group'
+
