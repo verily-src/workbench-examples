@@ -31,7 +31,8 @@ process runqc {
         }
 
     input:
-        tuple val(sample_id), path(reads)  
+        tuple val(sample_id), path(reads)
+        path adapters_file
 
     output:
         tuple val(sample_id), path("${sample_id}*P.fastq.gz"), emit: paired_fastq
@@ -43,13 +44,13 @@ process runqc {
       PE \
       -threads ${threads} \
       ${reads[0]} ${reads[1]} ${sample_id}.1P.fastq.gz ${sample_id}.1U.fastq.gz ${sample_id}.2P.fastq.gz ${sample_id}.2U.fastq.gz \
-      ILLUMINACLIP:${adapters}:2:30:10:3:TRUE \
+      ILLUMINACLIP:${adapters_file}:2:30:10:3:TRUE \
       LEADING:${leading} \
       TRAILING:${trailing} \
       SLIDINGWINDOW:${slidingwindow} \
       MINLEN:${minlen} \
       2> ${sample_id}.trimmomatic.stats.log
-      
+
     """
 }
 
@@ -73,6 +74,6 @@ process QCstats {
         path("trimmomatic.stats"), emit: combo_trim_stats
 
     """
-    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
+    ${PYTHON3} /opt/amrplusplus/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }

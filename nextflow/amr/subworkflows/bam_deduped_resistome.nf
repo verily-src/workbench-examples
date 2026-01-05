@@ -17,14 +17,14 @@ workflow BAM_DEDUP_RESISTOME_WF {
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP")
             resistomeanalyzer = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
         runresistome_dedup(bam_ch,amr, annotation, resistomeanalyzer )
         resistomeresults_dedup(runresistome_dedup.out.resistome_counts.collect())
         if (params.snp == "Y") {
-            runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix) 
+            runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix, amrsnp)
             snpresults_dedup(runsnp_dedup.out.snp_counts.collect())
         }
 }

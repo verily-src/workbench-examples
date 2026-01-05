@@ -24,7 +24,7 @@ workflow FASTQ_RESISTOME_WF {
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP")
             resistomeanalyzer = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
@@ -55,7 +55,7 @@ workflow FASTQ_RESISTOME_WF {
         plotrarefaction(runrarefaction.out.rarefaction.collect())
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)
+            runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix, amrsnp)
             snpresults(runsnp.out.snp_counts.collect() )
         }
         // Add analysis of deduped counts

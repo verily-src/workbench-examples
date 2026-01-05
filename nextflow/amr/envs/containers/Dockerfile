@@ -20,6 +20,7 @@ RUN apt-get update -q && \
         subversion \
         wget \
         g++ \
+        make \
         libarchive13 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -59,5 +60,14 @@ RUN set -x && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy && \
     /opt/conda/bin/conda install -c conda-forge mamba && \
-    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3.9 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken numpy pysam pandas biopython matplotlib nextflow && \
+    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3.9 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken numpy pysam pandas biopython matplotlib nextflow=24 && \
     conda clean --all
+
+# Copy AMR++ bin scripts into the container
+COPY bin /opt/amrplusplus/bin
+RUN chmod +x /opt/amrplusplus/bin/*.py && \
+    chmod +x /opt/amrplusplus/bin/rarefaction && \
+    chmod +x /opt/amrplusplus/bin/resistome
+
+# Add bin directory to PATH
+ENV PATH="/opt/amrplusplus/bin:${PATH}"

@@ -53,8 +53,8 @@ process bwa_align {
         }
 
     input:
-        path indexfiles 
-        tuple val(pair_id), path(reads) 
+        path indexfiles
+        tuple val(pair_id), path(reads)
 
     output:
         tuple val(pair_id), path("${pair_id}_alignment_sorted.bam"), emit: bwa_bam
@@ -93,8 +93,8 @@ process bwa_rm_contaminant_fq {
     label "alignment"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3 
- 
+    maxRetries 3
+
     publishDir "${params.output}/HostRemoval", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf("fastq.gz") > 0) "NonHostFastq/$filename"
@@ -103,12 +103,12 @@ process bwa_rm_contaminant_fq {
 
     input:
     path indexfiles
-    tuple val(pair_id), path(reads) 
+    tuple val(pair_id), path(reads)
 
     output:
     tuple val(pair_id), path("${pair_id}.non.host.R*.fastq.gz"), emit: nonhost_reads
     path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
-    
+
     """
     ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
@@ -147,6 +147,6 @@ process HostRemovalStats {
         path("host.removal.stats"), emit: combo_host_rm_stats
 
     """
-    ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${host_rm_stats} -o host.removal.stats
+    ${PYTHON3} /opt/amrplusplus/bin/samtools_idxstats.py -i ${host_rm_stats} -o host.removal.stats
     """
 }
