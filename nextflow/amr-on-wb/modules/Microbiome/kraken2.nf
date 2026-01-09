@@ -5,7 +5,7 @@ threads = params.threads
 kraken_confidence = params.kraken_confidence
 
 process dlkraken {
-    tag { "downloading kraken db"}
+    tag { }
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -14,11 +14,11 @@ process dlkraken {
     publishDir "$baseDir/data/kraken_db/", mode: 'copy'
 
     output:
-        path("minikraken_8GB_20200312/"), emit:kraken_db
+        path("minikraken_8GB_20200312/")
 
     """
-    wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
-    tar -xvzf minikraken_8GB_202003.tgz
+        wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
+        tar -xvzf minikraken_8GB_202003.tgz
 
     """
 }
@@ -73,7 +73,7 @@ process krakenresults {
 	path("unclassifieds_kraken_analytic_matrix.conf_${kraken_confidence}.csv")
 
     """
-    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${kraken_confidence}.csv
+    ${PYTHON3} /opt/amrplusplus/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${kraken_confidence}.csv
     """
 }
 
@@ -103,3 +103,37 @@ process runbracken {
         """
 }
 
+process kronadb {
+    label "microbiome"
+    output:
+        file("krona_db/taxonomy.tab") optional true into krona_db_ch // is this a value ch?
+
+    when: 
+        !params.skip_krona
+        
+    script:
+    """
+    ktUpdateTaxonomy.sh krona_db
+    """
+}
+
+process kronafromkraken {
+    publishDir params.outdir, mode: 'copy'
+    label "microbiome"
+    input:
+        file(x) from kraken2krona_ch.collect()
+        //file(y) from kaiju2krona_ch.collect()
+        file("krona_db/taxonomy.tab") from krona_db_ch
+    
+    output:
+        file("*_taxonomy_krona.html")
+
+    when:
+        !params.skip_krona
+    
+    script:
+    """
+    mkdir -p krona
+    ktImportTaxonomy -o kraken2_taxonomy_krona.html -tax krona_db $x
+    """
+}
