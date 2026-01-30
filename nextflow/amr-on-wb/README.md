@@ -13,7 +13,7 @@ This repository provides simplified scripts for running AMR++ in three different
 
 1. **Local** - Run on your machine using Docker
 2. **GCP** - Run on Google Batch with local Nextflow orchestration
-3. **Workbench** - Run on Google Batch with Verily Workbench
+3. **Workbench** - Run on Google Batch with Verily Workbench orchestration
 
 ### Prerequisites
 
@@ -106,6 +106,8 @@ For GCP or Workbench environments, set up the required infrastructure first:
 # Set up infrastructure for Workbench environment
 ./scripts/setup_infra.sh wb
 ```
+
+**Note:** Due to current permissions issues within Workbench, `setup.infra.sh` must be run locally.
 
 ### Data Upload (Cloud Environments)
 
@@ -245,16 +247,6 @@ For production use with Google Batch:
    ```
 
 Results will be stored in your Workbench GCS bucket.
-
-## Configuration Files
-
-Environment-specific variables are stored in `scripts/config/*.env` files (created from `.env.template` files). These files contain:
-- GCS bucket names and locations
-- Docker image names and tags
-- Service account configurations
-- Nextflow profiles and configs
-
-**Security Note**: The `.env` files are gitignored to prevent committing sensitive information. Only template files are tracked in version control.
 
 ## Additional Resources
 
