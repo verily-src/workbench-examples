@@ -91,6 +91,7 @@ process runresistome {
       -group_fp ${sample_id}.${prefix}.group.tsv \
       -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
       -class_fp ${sample_id}.${prefix}.class.tsv \
+      -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
 
     rm ${sample_id}.sam
@@ -151,6 +152,7 @@ process runrarefaction {
       -group_fp ${sample_id}.group.tsv \
       -mech_fp ${sample_id}.mech.tsv \
       -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -min ${min} \
       -max ${max} \
       -skip ${skip} \
