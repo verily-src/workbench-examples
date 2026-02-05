@@ -1,206 +1,113 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Nextflow](https://img.shields.io/badge/Nextflow-%E2%89%A50.25.1-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/Nextflow-v24-brightgreen.svg)](https://www.nextflow.io/)
 
 # AMR++ Bioinformatic Pipeline
 
 AMR++ is a bioinformatic pipeline for analyzing raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome. Developed to work with the [MEGARes database](https://megares.meglab.org/), it contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes with an annotation structure optimized for high-throughput sequencing and metagenomic analysis.
 
-This repository is adapted from the [original AMR++ pipeline](https://github.com/Microbial-Ecology-Group/AMRplusplus) with simplified scripts for running in local, GCP, and Verily Workbench environments.
+**This repository demonstrates running AMR++ on Verily Workbench with orchestration through Workbench and compute on Google Batch.** It is adapted from the [original AMR++ pipeline](https://github.com/Microbial-Ecology-Group/AMRplusplus) with simplified scripts for cloud execution.
 
-## Quick Start
+Additional environments are provided for testing and debugging:
+- **Local** - For quick testing and development
+- **GCP** - For debugging Google Batch jobs with visible logs (Workbench currently has permissions issues showing Batch logs)
 
-This repository provides simplified scripts for running AMR++ in three different environments:
+## Dependencies
 
-1. **Local** - Run on your machine using Docker
-2. **GCP** - Run on Google Batch with local Nextflow orchestration
-3. **Workbench** - Run on Google Batch with Verily Workbench orchestration
+### Required for Workbench Deployment
+- **Verily Workbench CLI** (`wb`) - Workbench command-line tool
+- **Google Cloud SDK** (`gcloud`) - GCP command-line tool
+- **Docker** - For building and pushing container images (must be running)
+- **Nextflow v24** - Workflow orchestration (installed in Workbench app)
+  - **Note**: v25 has breaking changes and is not compatible with this pipeline
 
-### Prerequisites
+**Important Notes**:
+- Ensure Docker is running on your local machine before executing `./scripts/build.sh --env wb --push`
+- You must be an **ADMIN** of the Workbench workspace where this pipeline will run
 
-- **For local execution**: Docker, Conda (with AMR++_env), Nextflow
-- **For GCP execution**: Google Cloud SDK (`gcloud`), Docker
-- **For Workbench execution**: Verily Workbench CLI (`wb`), Google Cloud SDK
+### Optional Dependencies (for testing/debugging environments)
+- **Local**: Docker, Conda
+- **GCP**: `gcloud`, Docker
 
-## Environment Setup
-
-### 1. Create Configuration Files
-
-Copy the template files and customize them with your values:
-
-```bash
-# For local environment
-cp scripts/config/local.env.template scripts/config/local.env
-
-# For GCP environment
-cp scripts/config/gcp.env.template scripts/config/gcp.env
-
-# For Workbench environment
-cp scripts/config/wb.env.template scripts/config/wb.env
-```
-
-### 2. Edit Configuration Files
-
-Each `.env` file has two sections:
-- **USER CONFIGURATION**: Values you must update (marked with `<PLACEHOLDER>`)
-- **AUTOMATIC CONFIGURATION**: Auto-generated values (do not modify)
-
-#### local.env
-Update the following:
-- `IMAGE_NAME`: Replace `<YOUR_DOCKERHUB_USERNAME>` with your Docker Hub username
-  - Example: `"johndoe/amrplusplus-workbench"`
-
-#### gcp.env
-Update the following:
-- `GCS_BUCKET`: Replace `<YOUR_BUCKET_NAME>` with your GCS bucket name (without `gs://` prefix)
-  - Example: `my-nextflow-data`
-- `GOOGLE_ARTIFACT_REPO`: Replace `<YOUR_ARTIFACT_REPO>` with your artifact registry repository name
-  - Example: `nextflow-containers`
-- `GCS_BUCKET_LOCATION`: Optionally change the region (default: `us-central1`)
-
-#### wb.env
-Update the following:
-- `GCS_BUCKET`: Replace `<YOUR_BUCKET_ID>` with your Workbench GCS bucket resource ID
-  - Example: `nf-output`
-- `GOOGLE_ARTIFACT_REPO`: Replace `<YOUR_ARTIFACT_REPO>` with your artifact registry repository name
-  - Example: `nextflow-containers`
-- `GCS_BUCKET_LOCATION`: Optionally change the region (default: `us-central1`)
-
-**Note:** Project IDs, service accounts, and registry paths are automatically determined from your `gcloud` and `wb` CLI configurations.
-
-## Usage
-
-### Building Docker Images
-
-```bash
-# Build for local use
-./scripts/build.sh
-
-# Build for GCP and push to registry
-./scripts/build.sh --env gcp --push
-
-# Build for Workbench and push to registry
-./scripts/build.sh --env wb --push
-```
-
-### Running the Pipeline
-
-```bash
-# Run locally with Docker
-./scripts/run.sh
-
-# Run on Google Batch with local orchestration
-./scripts/run.sh --env gcp
-
-# Run on Google Batch with Workbench orchestration
-./scripts/run.sh --env wb
-```
-
-### Infrastructure Setup (Cloud Environments)
-
-For GCP or Workbench environments, set up the required infrastructure first:
-
-```bash
-# Set up infrastructure for GCP environment
-./scripts/setup_infra.sh gcp
-
-# Set up infrastructure for Workbench environment
-./scripts/setup_infra.sh wb
-```
-
-**Note:** Due to current permissions issues within Workbench, `setup.infra.sh` must be run locally.
-
-### Data Upload (Cloud Environments)
-
-Upload your data to GCS before running cloud pipelines:
-
-```bash
-# Upload data for GCP environment
-./scripts/upload_data.sh gcp
-
-# Upload data for Workbench environment
-./scripts/upload_data.sh wb
-```
-
-## Environment Details
-
-### Local Environment
-- **Description**: Run Nextflow locally using Docker containers
-- **Requirements**: Docker daemon, Conda environment (AMR++_env)
-- **Profile**: `docker`
-- **Use case**: Testing, development, small datasets
-
-### GCP Environment
-- **Description**: Run on Google Batch with local Nextflow orchestration
-- **Requirements**: `gcloud` CLI configured, GCS bucket, Artifact Registry
-- **Profile**: `google-batch`
-- **Use case**: Large-scale processing with cloud resources, local monitoring
-
-### Workbench Environment
-- **Description**: Run on Google Batch with Verily Workbench orchestration
-- **Requirements**: Workbench workspace, `wb` CLI, Workbench-managed resources
-- **Profile**: `workbench`
-- **Use case**: Collaborative analysis in Verily Workbench environment
-
-## Pipeline Options
-
-### Available Pipeline Workflows
-
-AMR++ can be customized using the `--pipeline` parameter:
-
-- **`demo`** (default): Simple demonstration on test data
-- **`standard_AMR`**: QC trimming → Host DNA removal → Resistome alignment → Results
-- **`fast_AMR`**: Same as standard but skips host removal for faster analysis
-- **`standard_AMR_wKraken`**: Standard AMR + microbiome analysis with Kraken
-
-### Pipeline Subworkflows
-
-Run specific components independently:
-
-- **`eval_qc`**: Evaluate sample QC
-- **`trim_qc`**: QC trimming using Trimmomatic
-- **`rm_host`**: Remove host DNA contamination
-- **`resistome`**: Align to MEGARes, perform rarefaction and resistome analysis
-- **`kraken`**: Taxonomic classification
-- **`bam_resistome`**: Run resistome analysis starting from BAM files
-
-### Optional Analysis Flags
-
-#### SNP Verification
-Include SNP-confirmed resistance gene counts:
-
-```bash
-nextflow run main_AMR++.nf --pipeline standard_AMR --snp Y
-```
-
-Output: `SNPconfirmed_AMR_analytic_matrix.csv` (in addition to standard count matrix)
-
-#### Deduplicated Counts
-Include deduplicated count analysis:
-
-```bash
-nextflow run main_AMR++.nf --pipeline standard_AMR --snp Y --deduped Y
-```
-
-**Note**: This significantly increases runtime and storage requirements.
-
-### Example Commands
-
-Run standard AMR++ workflow with all options:
-
-```bash
-# Local execution
-nextflow run main_AMR++.nf -profile docker --pipeline standard_AMR --reads "data/raw/*_R{1,2}.fastq.gz" --snp Y --deduped Y
-
-# GCP execution (after running ./scripts/setup_infra.sh gcp and ./scripts/upload_data.sh gcp)
-./scripts/run.sh --env gcp
-
-# Workbench execution (after running ./scripts/setup_infra.sh wb and ./scripts/upload_data.sh wb)
-./scripts/run.sh --env wb
-```
 
 ## AMR++ on Verily Workbench
 
-### Quick Demo in Workbench JupyterLab
+**Prerequisites**:
+- You must create a Workbench workspace where you have **ADMIN** permissions
+- All setup and execution must be done within this workspace
+
+### Quick Start: Workbench Orchestration with Google Batch
+
+This guide walks through setting up and running AMR++ with Workbench orchestration and Google Batch compute. The setup is split between local commands (for infrastructure) and Workbench app commands (for execution).
+
+#### Step 1: Create Workspace and App
+
+Create a new workspace and app in the Workbench UI (or use the CLI if preferred).
+
+#### Step 2: Local Setup
+
+Run these commands on your **local machine**:
+
+```bash
+# Set your active workspace (replace with your workspace ID)
+wb workspace set --id=your-workspace-id
+
+# Copy the Workbench environment template
+cp scripts/config/wb.env.template scripts/config/wb.env
+```
+
+Edit `scripts/config/wb.env` and set the user-defined variables:
+- `GCS_BUCKET`: Your Workbench GCS bucket resource ID (e.g., `nf-output`)
+- `GOOGLE_ARTIFACT_REPO`: Your artifact registry repo (e.g., `nextflow-containers`)
+- `GCS_BUCKET_LOCATION`: Region (default: `us-central1`)
+
+**Notes**:
+- Project IDs, service accounts, and registry paths are automatically determined from your `gcloud` and `wb` CLI configurations
+- **Future Improvement**: Consider using separate buckets for input data and Nextflow output to better organize resources
+
+Then run:
+
+```bash
+# Set up infrastructure (creates buckets, service accounts, etc.)
+./scripts/setup_infra.sh wb
+
+# Upload input data to GCS
+./scripts/upload_data.sh wb
+
+# Build Docker image and push to Artifact Registry
+# NOTE: Docker must be running before executing this command
+./scripts/build.sh --env wb --push
+```
+
+#### Step 3: Workbench App Setup
+
+Open your Workbench app, launch the Terminal, and run:
+
+```bash
+# Clone the repository (adjust branch as needed)
+cd repos/ && git clone -b samh/amr-dev https://github.com/verily-src/workbench-examples.git && cd workbench-examples/nextflow/amr-on-wb/
+
+# Copy the environment template
+cp scripts/config/wb.env.template scripts/config/wb.env
+```
+
+Now copy your local `wb.env` configuration into the Workbench app.
+
+#### Step 4: Run the Pipeline
+
+```bash
+./scripts/run.sh --env wb
+```
+
+Results will be stored in your configured GCS bucket.
+
+**Known Issues**:
+- The `gcloud storage cp` command may not correctly resolve Workbench resource names to full `gs://` paths when running `upload_data.sh` or `run.sh`. If you encounter path resolution issues, manually specify the full GCS bucket path in your `wb.env` configuration.
+
+---
+
+### Alternative: Quick Demo in Workbench JupyterLab (Workbench Execution)
+
+For a simple demonstration without Google Batch (both orchestration and execution running in the same Workbench app):
 
 Create a new Workbench workspace and add this git repository in the **Apps** tab.
 
@@ -227,26 +134,48 @@ nextflow run main_AMR++.nf
 
 Expected output: **Succeeded: 24** with results in `~/repos/AMRplusplus/test_results`
 
-### Production Workbench Deployment
+---
 
-For production use with Google Batch:
+## Supporting Environments
 
-1. **Setup infrastructure**:
-   ```bash
-   ./scripts/setup_infra.sh wb
-   ```
+The following environments are provided for testing and debugging purposes.
 
-2. **Upload your data**:
-   ```bash
-   ./scripts/upload_data.sh wb
-   ```
+### Local Environment (Testing)
 
-3. **Run the pipeline**:
-   ```bash
-   ./scripts/run.sh --env wb
-   ```
+**Purpose**: Quick testing and development on small datasets
 
-Results will be stored in your Workbench GCS bucket.
+**Setup**:
+```bash
+cp scripts/config/local.env.template scripts/config/local.env
+# Edit local.env and set IMAGE_NAME
+./scripts/build.sh
+./scripts/run.sh
+```
+
+**Requirements**: Docker, Conda
+
+### GCP Environment (Debugging)
+
+**Purpose**: Debug Google Batch jobs with visible logs (workaround for Workbench permissions issues)
+
+**Setup**:
+```bash
+cp scripts/config/gcp.env.template scripts/config/gcp.env
+# Edit gcp.env and set GCS_BUCKET, GOOGLE_ARTIFACT_REPO
+./scripts/setup_infra.sh gcp
+./scripts/upload_data.sh gcp
+./scripts/build.sh --env gcp --push
+./scripts/run.sh --env gcp
+```
+
+**Requirements**: `gcloud` CLI, Docker
+
+**Configuration** (`gcp.env`):
+- `GCS_BUCKET`: Your GCS bucket name (without `gs://` prefix)
+  - Example: `my-nextflow-data`
+- `GOOGLE_ARTIFACT_REPO`: Your artifact registry repository name
+  - Example: `nextflow-containers`
+- `GCS_BUCKET_LOCATION`: Region (default: `us-central1`)
 
 ## Additional Resources
 
