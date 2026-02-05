@@ -1,157 +1,195 @@
-Overview
---------
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Nextflow](https://img.shields.io/badge/Nextflow-%E2%89%A50.25.1-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/Nextflow-v24-brightgreen.svg)](https://www.nextflow.io/)
+
+# AMR++ Bioinformatic Pipeline
+
+AMR++ is a bioinformatic pipeline for analyzing raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome. Developed to work with the [MEGARes database](https://megares.meglab.org/), it contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes with an annotation structure optimized for high-throughput sequencing and metagenomic analysis.
+
+**This repository demonstrates running AMR++ on Verily Workbench with orchestration through Workbench and compute on Google Batch.** It is adapted from the [original AMR++ pipeline](https://github.com/Microbial-Ecology-Group/AMRplusplus) with simplified scripts for cloud execution.
+
+Additional environments are provided for testing and debugging:
+- **Local** - For quick testing and development
+- **GCP** - For debugging Google Batch jobs with visible logs (Workbench currently has permissions issues showing Batch logs)
+
+## Dependencies
+
+### Required for Workbench Deployment
+- **Verily Workbench CLI** (`wb`) - Workbench command-line tool
+- **Google Cloud SDK** (`gcloud`) - GCP command-line tool
+- **Docker** - For building and pushing container images (must be running)
+- **Nextflow v24** - Workflow orchestration (installed in Workbench app)
+  - **Note**: v25 has breaking changes and is not compatible with this pipeline
+
+**Important Notes**:
+- Ensure Docker is running on your local machine before executing `./scripts/build.sh --env wb --push`
+- You must be an **ADMIN** of the Workbench workspace where this pipeline will run
+
+### Optional Dependencies (for testing/debugging environments)
+- **Local**: Docker, Conda
+- **GCP**: `gcloud`, Docker
 
 
-# AMR++ bioinformatic pipeline
-(https://megares.meglab.org/)
+## AMR++ on Verily Workbench
 
-AMR++ is a bioinformatic pipeline meant to aid in the analysis of raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome. AMR++ was developed to work in conjuction with the the MEGARes database which contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers.
+**Prerequisites**:
+- You must create a Workbench workspace where you have **ADMIN** permissions
+- All setup and execution must be done within this workspace
 
-The goal of many metagenomics studies is to characterize the content and relative abundance of sequences of interest from the DNA of a given sample or set of samples. You may want to know what is contained within your sample or how abundant a given sequence is relative to another.
+### Quick Start: Workbench Orchestration with Google Batch
 
-Often, metagenomics is performed when the answer to these questions must be obtained for a large number of targets where techniques like multiplex PCR and other targeted methods would be too cumbersome to perform. AMR++ can process the raw data from the sequencer, identify the fragments of DNA, and count them. It also provides a count of the polymorphisms that occur in each DNA fragment with respect to the reference database.
+This guide walks through setting up and running AMR++ with Workbench orchestration and Google Batch compute. The setup is split between local commands (for infrastructure) and Workbench app commands (for execution).
 
-Additionally, you may want to know if the depth of your sequencing (how many reads you obtain that are on target) is high enough to identify rare organisms (organisms with low abundance relative to others) in your population. This is referred to as rarefaction and is calculated by randomly subsampling your sequence data at intervals between 0% and 100% in order to determine how many targets are found at each depth.
+#### Step 1: Create Workspace and App
 
-With AMR++, you will obtain alignment count files for each sample that are combined into a count matrix that can be analyzed using any statistical and mathematical techniques that can operate on a matrix of observations.
+Create a new workspace and app in the Workbench UI (or use the CLI if preferred).
 
-More Information
-----------------
+#### Step 2: Local Setup
+
+Run these commands on your **local machine**:
+
+```bash
+# Set your active workspace (replace with your workspace ID)
+wb workspace set --id=your-workspace-id
+
+# Copy the Workbench environment template
+cp scripts/config/wb.env.template scripts/config/wb.env
+```
+
+Edit `scripts/config/wb.env` and set the user-defined variables:
+- `GCS_BUCKET`: Your Workbench GCS bucket resource ID (e.g., `nf-output`)
+- `GOOGLE_ARTIFACT_REPO`: Your artifact registry repo (e.g., `nextflow-containers`)
+- `GCS_BUCKET_LOCATION`: Region (default: `us-central1`)
+
+**Notes**:
+- Project IDs, service accounts, and registry paths are automatically determined from your `gcloud` and `wb` CLI configurations
+- **Future Improvement**: Consider using separate buckets for input data and Nextflow output to better organize resources
+
+Then run:
+
+```bash
+# Set up infrastructure (creates buckets, service accounts, etc.)
+./scripts/setup_infra.sh wb
+
+# Upload input data to GCS
+./scripts/upload_data.sh wb
+
+# Build Docker image and push to Artifact Registry
+# NOTE: Docker must be running before executing this command
+./scripts/build.sh --env wb --push
+```
+
+#### Step 3: Workbench App Setup
+
+Open your Workbench app, launch the Terminal, and run:
+
+```bash
+# Clone the repository (adjust branch as needed)
+cd repos/ && git clone -b samh/amr-dev https://github.com/verily-src/workbench-examples.git && cd workbench-examples/nextflow/amr-on-wb/
+
+# Copy the environment template
+cp scripts/config/wb.env.template scripts/config/wb.env
+```
+
+Now copy your local `wb.env` configuration into the Workbench app.
+
+#### Step 4: Run the Pipeline
+
+```bash
+./scripts/run.sh --env wb
+```
+
+Results will be stored in your configured GCS bucket.
+
+**Known Issues**:
+- The `gcloud storage cp` command may not correctly resolve Workbench resource names to full `gs://` paths when running `upload_data.sh` or `run.sh`. If you encounter path resolution issues, manually specify the full GCS bucket path in your `wb.env` configuration.
+
+---
+
+### Alternative: Quick Demo in Workbench JupyterLab (Workbench Execution)
+
+For a simple demonstration without Google Batch (both orchestration and execution running in the same Workbench app):
+
+Create a new Workbench workspace and add this git repository in the **Apps** tab.
+
+Create a JupyterLab app instance, launch it, and open the terminal:
+
+```bash
+# Initialize conda
+conda init
+source ~/.bashrc
+
+# Navigate to the repository
+cd repos/AMRplusplus
+
+# Create and activate the conda environment
+conda env create -f envs/AMR++_env.yaml
+conda activate AMR++_env
+
+# Verify Nextflow version 24 is installed
+nextflow -v
+
+# Run the test pipeline (takes ~5 minutes)
+nextflow run main_AMR++.nf
+```
+
+Expected output: **Succeeded: 24** with results in `~/repos/AMRplusplus/test_results`
+
+---
+
+## Supporting Environments
+
+The following environments are provided for testing and debugging purposes.
+
+### Local Environment (Testing)
+
+**Purpose**: Quick testing and development on small datasets
+
+**Setup**:
+```bash
+cp scripts/config/local.env.template scripts/config/local.env
+# Edit local.env and set IMAGE_NAME
+./scripts/build.sh
+./scripts/run.sh
+```
+
+**Requirements**: Docker, Conda
+
+### GCP Environment (Debugging)
+
+**Purpose**: Debug Google Batch jobs with visible logs (workaround for Workbench permissions issues)
+
+**Setup**:
+```bash
+cp scripts/config/gcp.env.template scripts/config/gcp.env
+# Edit gcp.env and set GCS_BUCKET, GOOGLE_ARTIFACT_REPO
+./scripts/setup_infra.sh gcp
+./scripts/upload_data.sh gcp
+./scripts/build.sh --env gcp --push
+./scripts/run.sh --env gcp
+```
+
+**Requirements**: `gcloud` CLI, Docker
+
+**Configuration** (`gcp.env`):
+- `GCS_BUCKET`: Your GCS bucket name (without `gs://` prefix)
+  - Example: `my-nextflow-data`
+- `GOOGLE_ARTIFACT_REPO`: Your artifact registry repository name
+  - Example: `nextflow-containers`
+- `GCS_BUCKET_LOCATION`: Region (default: `us-central1`)
+
+## Additional Resources
+
+**Original AMR++ Repository**: [https://github.com/Microbial-Ecology-Group/AMRplusplus](https://github.com/Microbial-Ecology-Group/AMRplusplus)
+
+For more detailed information about the AMR++ pipeline:
 
 - [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
 - [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
 - [Configuration](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
 - [Output](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/output.md)
 - [Dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
-- [Software Requirements](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/requirements.md)
 - [FAQs](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/FAQs.md)
-- [Details on AMR++ updates](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/update_details.md)
-- [Contact](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/contact.md)
 
+## License
 
-
-## AMR++ demonstration
-
-If anaconda is already installed, we'll just need to download the AMR++ github repository and create the AMR++ conda environment. Please review the [installation document](docs/installation.md) for alternative methods to install AMR++ in your computing environment.
-
-```bash
-# Confirm conda works
-conda -h
-```
-
-Clone the AMR++ repository.
-
-```bash
-git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
-```
-
-Navigate into the AMR++ repository and run the test command.
-```bash
-cd AMRplusplus
-
-# Now we can use the included recipe to make the AMR++ environment
-conda env create -f envs/AMR++_env.yaml
-# This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc. 
-
-# Once it's completed, activate the environment
-conda activate AMR++_env.yaml
-
-# You now have access to all the AMR++ software dependencies (locally)
-samtools --help
-
-# Run command to perform the demonstration pipeline using the conda profile.
-nextflow run main_AMR++.nf
-
-
-```
-Now, you can check out the results in the newly created "test_results" directory.
-
-# Using AMR++ to analyze your data
-
-AMR++ is customizable to suit your computing needs and analyze your data. Primarily, the ```-profile``` paramater allows you to choose between running AMR++ using a singularity container, docker container, anaconda packages, or a local installation of your software. 
-All parameters used to control how AMR++ analyzes your data can also be changed as needed in a variety of ways. For full information, review this [configuration document.](docs/configuration.md)
-
-
-Below is a brief example, the default parameters were run using this command (with the conda environment, AMR++_env, already activated):
-
-```nextflow run main_AMR++.nf```
-
-To change the reads that were analyzed, you should specify the ```--reads`` parameters. Here, we can use regular expressions to point to your samples in a different directory.
-```bash
-nextflow run main_AMR++.nf --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
-```
-
-#### [Here's an extended tutorial to run each AMR++ component individually](docs/Step_by_step_tutorial.md)
-
-
-
-# Optional flags
-
-## SNP verification
-
-AMR++ now works in conjuction with a [custom SNP verification software](https://github.com/Isabella136/AmrPlusPlus_SNP) to evaluate alignments to gene accessions requiring SNP confirmation to confer resistance. To include this workflow, include the ```--snp Y``` flag in your command like this:
-
-```bash
-nextflow run main_AMR++.nf -profile conda --snp Y
-```
-This will create with the standard count table (AMR_analytic_matrix.csv) in addition to a count matrix with SNP confirmed counts (SNPconfirmed_AMR_analytic_matrix.csv).
-
-## Deduplicated counts
-
-Another option is to include results for deduplicated counts by using the ```--deduped Y``` flag in your command.
-
-```bash
-nextflow run main_AMR++.nf -profile conda --snp Y --deduped Y
-```
-
-With this flag, AMR++ will extract the deduplicated alignments to MEGARes also output a count matrix with deduplicated counts. Since also we included the ```--snp Y``` flag, we will end up with 4 total output count matrices.
-
-# Choosing the right pipeline
-
-AMR++ analyzes data by combining workflows that takes a set of sequencing reads through various bioinformatic software. We recommend our standard AMR++ pipeline as a comprehensive way to start from raw sequencing reads, QC assessment, host DNA removal, and resistome analysis with MEGARes. However, users might only want to replicate portions of the pipeline and have more control over their computing needs. Using the ```--pipeline``` parameter, users can now change how AMR++ runs.
-
-
-
-## Pipeline workflows
-*  omitting the ```--pipeline``` flag or using ```--pipeline demo```    
-    * Simple demonstration on test data
-
-* ```--pipeline standard_AMR```   
-    * Steps: QC trimming > Host DNA removal > Resistome alignment > Resistome results
-
-* ```--pipeline fast_AMR```
-    * This workflow simply skips host removal to speed up analysis.
-    * Steps: QC trimming > Resistome alignment > Resistome results
-
-* ```--pipeline standard_AMR_wKraken```
-    * This workflow adds microbiome analysis with kraken. It requires having a local kraken database. The minikraken_8GB_202003 will be downloaded automatically and requires ~8GB of space. Otherwise, you can specify the location to your own database with the flag, ```--kraken_db "/Path/to/KrakenDb/"```
-    * Steps:
-        * QC trimming > Host DNA removal > Resistome alignment > Resistome results 
-        * Non-host reads > Microbiome analysis
-
-## Pipeline subworkflows
-* ```--pipeline eval_qc```  
-    * Evaluate sample QC 
-* ```--pipeline trim_qc```  
-    * QC trimming using trimmomatic 
-* ```--pipeline rm_host```  
-    * Align reads to host DNA using bwa and remove contaminants 
-* ```--pipeline resistome```  
-    * Align reads to MEGARes using bwa, perform rarefaction and resistome analysis
-* ```--pipeline kraken```  
-    * Classify reads taxonomically using kraken.
-* ```--pipeline bam_resistome```
-    * This will run the resistome pipeline starting with bam files from a previous alignment to MEGARes.
-    * Need to include ```--bam_files "Path/to/BAM/*.bam"``` in the command line.
-
-## Example command
-In the following example, we'll choose to run the standard AMR++ workflow, which includes QC trimming, host removal, and Resistome analysis. Since we included the ```--snp Y --deduped Y``` flags, we'll also get ouput for deduped counts and SNP confirmed counts.
-
-Alternatively, you can modify all of these variables and more in the "params.config" file which will be loaded automatically. Just make sure to include the "-profile" and "--pipeline" flags. More information [in this document](docs/configuration.md)
-
-```bash
-# Remember to update the --reads flag to match your read location
-nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y --deduped Y
-```
+MIT License

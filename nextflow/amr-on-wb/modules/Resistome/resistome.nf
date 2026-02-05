@@ -29,28 +29,24 @@ process build_dependencies {
     output:
         path("rarefaction"), emit: rarefactionanalyzer
         path("resistome"), emit: resistomeanalyzer
-        path("AmrPlusPlus_SNP/*"), emit: amrsnp
+        path("AmrPlusPlus_SNP"), emit: amrsnp
 
     """
-    # Uncomment these sections once the v2 rarefactionanalyzer and resistomeanalyzer repositories are updated, remove cp lines
-    #git clone https://github.com/cdeanj/rarefactionanalyzer.git
-    #cd rarefactionanalyzer
-    #make
-    #chmod 777 rarefaction
-    #mv rarefaction ../
-    #cd ../
-    #rm -rf rarefactionanalyzer
-    cp $baseDir/bin/rarefaction . 
+    git clone https://github.com/cdeanj/rarefactionanalyzer.git
+    cd rarefactionanalyzer
+    make
+    chmod 777 rarefaction
+    mv rarefaction ../
+    cd ../
+    rm -rf rarefactionanalyzer
 
-
-    #git clone https://github.com/cdeanj/resistomeanalyzer.git
-    #cd resistomeanalyzer
-    #make
-    #chmod 777 resistome
-    #mv resistome ../
-    #cd ../
-    #rm -rf resistomeanalyzer
-    cp $baseDir/bin/resistome .
+    git clone https://github.com/cdeanj/resistomeanalyzer.git
+    cd resistomeanalyzer
+    make
+    chmod 777 resistome
+    mv resistome ../
+    cd ../
+    rm -rf resistomeanalyzer
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
     chmod -R 777 AmrPlusPlus_SNP/
@@ -119,7 +115,7 @@ process resistomeresults {
         path("${prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
 
     """
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${prefix}_analytic_matrix.csv
+    ${PYTHON3} /opt/amrplusplus/bin/amr_long_to_wide.py -i ${resistomes} -o ${prefix}_analytic_matrix.csv
     """
 }
 
@@ -189,7 +185,7 @@ process plotrarefaction {
     """
     mkdir -p data/
     mv *.tsv data/
-    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd .
+    ${PYTHON3} /opt/amrplusplus/bin/rfplot.py --dir ./data --nd --s --sd .
     """
 }
 
@@ -198,6 +194,8 @@ process runsnp {
     tag {sample_id}
     label "python"
 
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
 
     publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
         saveAs: { filename ->
@@ -212,6 +210,7 @@ process runsnp {
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
+        path(amrsnp)
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
@@ -219,7 +218,14 @@ process runsnp {
         path("${sample_id}_${prefix}_SNPresistant_reads.txt")
 
     """
-    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
+    # Copy AmrPlusPlus_SNP files from staged input to current directory for Python imports
+    if [ -d AmrPlusPlus_SNP ]; then
+        cp -r AmrPlusPlus_SNP/* .
+    else
+        # Files might be staged directly without subdirectory
+        # In this case they're already in the work dir
+        :
+    fi
 
     # change name to stay consistent with count matrix name, but only if the names don't match
     if [ "${bam}" != "${sample_id}.bam" ]; then
@@ -228,12 +234,13 @@ process runsnp {
 
     python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output = True
 
-    python3 $baseDir/bin/extract_snp_column.py \
-      --sample-id "${sample_id}" \
-      --matrix "${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
-      --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 
-    mv */resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
+    cut -d ',' -f 1 ${sample_id}.${prefix}_SNPs${snp_count_matrix} > gene_accession_labels
+
+    paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
+
+    mv ${sample_id}.${prefix}_SNPs${sample_id}/resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
 
     """
 }
@@ -257,8 +264,6 @@ process snpresults {
         path("*_analytic_matrix.csv"), emit: snp_matrix
 
     """
-
-    ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
-
+    ${PYTHON3} /opt/amrplusplus/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
     """
 }
