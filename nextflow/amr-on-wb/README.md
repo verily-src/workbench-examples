@@ -177,6 +177,19 @@ cp scripts/config/gcp.env.template scripts/config/gcp.env
   - Example: `nextflow-containers`
 - `GCS_BUCKET_LOCATION`: Region (default: `us-central1`)
 
+## Configuration
+
+### Resource Scaling on Google Batch
+
+Google Batch does NOT automatically scale machine types based on CPU/memory requests. This repository includes automatic resource scaling configuration in `config/google_batch_resources.config`.
+
+**Key points**:
+- Each process that needs more than default resources must explicitly specify a matching `machineType`
+- Processes now use `task.cpus` for dynamic thread allocation
+- Configure resources using process labels or names
+
+See [docs/google-batch-resource-scaling.md](docs/google-batch-resource-scaling.md) for detailed guidance.
+
 ## Additional Resources
 
 **Original AMR++ Repository**: [https://github.com/Microbial-Ecology-Group/AMRplusplus](https://github.com/Microbial-Ecology-Group/AMRplusplus)

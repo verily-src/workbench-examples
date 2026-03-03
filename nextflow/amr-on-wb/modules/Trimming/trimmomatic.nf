@@ -42,7 +42,7 @@ process runqc {
     """
      ${TRIMMOMATIC} \
       PE \
-      -threads ${threads} \
+      -threads ${task.cpus} \
       ${reads[0]} ${reads[1]} ${sample_id}.1P.fastq.gz ${sample_id}.1U.fastq.gz ${sample_id}.2P.fastq.gz ${sample_id}.2U.fastq.gz \
       ILLUMINACLIP:${adapters_file}:2:30:10:3:TRUE \
       LEADING:${leading} \

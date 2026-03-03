@@ -49,7 +49,7 @@ process runkraken {
 
 
      """
-     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
+     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${task.cpus} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
 
      cut -f 2,3  ${sample_id}.conf_${kraken_confidence}.kraken.raw > ${sample_id}.conf_${kraken_confidence}.kraken.krona
     """
