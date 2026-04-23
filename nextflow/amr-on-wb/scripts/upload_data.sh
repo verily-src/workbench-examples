@@ -26,4 +26,4 @@ source "$CONFIG_FILE"
 DATA_DIR="${SCRIPT_DIR}/../data"
 
 # Upload data to GCS bucket
-gcloud storage cp -r "${DATA_DIR}" gs://${GCS_BUCKET}/
+gcloud storage cp -r "${DATA_DIR}" gs://${GCS_BUCKET}/amr-on-wb/
