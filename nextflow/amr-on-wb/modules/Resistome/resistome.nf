@@ -210,7 +210,6 @@ process runsnp {
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
-        path(amrsnp)
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
@@ -218,14 +217,7 @@ process runsnp {
         path("${sample_id}_${prefix}_SNPresistant_reads.txt")
 
     """
-    # Copy AmrPlusPlus_SNP files from staged input to current directory for Python imports
-    if [ -d AmrPlusPlus_SNP ]; then
-        cp -r AmrPlusPlus_SNP/* .
-    else
-        # Files might be staged directly without subdirectory
-        # In this case they're already in the work dir
-        :
-    fi
+    cp -r /opt/amrplusplus/bin/AmrPlusPlus_SNP/* .
 
     # change name to stay consistent with count matrix name, but only if the names don't match
     if [ "${bam}" != "${sample_id}.bam" ]; then

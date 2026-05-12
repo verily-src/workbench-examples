@@ -69,5 +69,9 @@ RUN chmod +x /opt/amrplusplus/bin/*.py && \
     chmod +x /opt/amrplusplus/bin/rarefaction && \
     chmod +x /opt/amrplusplus/bin/resistome
 
+# Clone AmrPlusPlus_SNP for SNP verification
+RUN git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git /opt/amrplusplus/bin/AmrPlusPlus_SNP && \
+    chmod -R 755 /opt/amrplusplus/bin/AmrPlusPlus_SNP
+
 # Add bin directory to PATH
 ENV PATH="/opt/amrplusplus/bin:${PATH}"
