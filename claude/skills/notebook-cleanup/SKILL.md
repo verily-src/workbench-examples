@@ -12,7 +12,7 @@
 
   When invoked, this skill will:
 
-  1. **Discover notebooks** — Find all `.ipynb` files that have been modified (staged or unstaged) in the current Git repository. If no modified notebooks are found, scan the entire repo and prompt the user to select which notebooks to clean.
+  1. **Discover notebooks** — Find all `.ipynb` files that have been modified (staged or unstaged) in the current Git repository, comparing the changes on the existing branch to the main branch. You should ask the user to confirm the notebooks before proceeding with any changes. If no modified notebooks are found, scan the entire repo and prompt the user to select which notebooks to clean.
 
   2. **Detect notebook language** — Read the notebook's kernel metadata to determine the language (Python, R, etc.) and apply language-appropriate linting rules.
 
@@ -155,4 +155,4 @@
   - notebook-snapshots/src/analysis/validation.html
   - notebook-snapshots/src/models/training_run.html
   
-  All files staged for commit.
+  All files staged for commit. Confirm with user if they would like the linting fixes to be made.
