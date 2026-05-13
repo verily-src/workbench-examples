@@ -33,11 +33,83 @@
   5. **Generate HTML snapshots** — For each notebook, export an HTML snapshot before clearing outputs. Store the HTML file in a `notebook-snapshots` directory that mirrors the notebook's relative path in the repo. For example:
      - `src/analysis/exploration.ipynb` → `.notebook-snapshots/src/analysis/exploration.html`
 
-  6. **Clear cell outputs** — Strip all cell outputs and execution counts from each `.ipynb` file in place, preserving the notebook structure and source code.
+ 6. **Ensure provenance and copyright boilerplate** — Check that the notebook ends with the required boilerplate cells. If missing, append them. For Python notebooks,
+   the provenance section includes:
 
-  7. **Stage snapshot files** — Add the generated HTML snapshots to the Git staging area alongside the cleaned notebooks so they are included in the commit.
+     **Markdown cell:**
+  Provenance
+  
+     Generate information about this notebook environment and the packages installed.
 
-  8. **Report results** — Summarize linting findings, what was cleaned, and where HTML snapshots were saved.
+  **Code cell:** `!date`
+
+  **Markdown cell:** `Conda and pip installed packages:`
+
+  **Code cell:** `!conda env export`
+
+  **Markdown cell:** `JupyterLab extensions:`
+  
+  **Code cell:** `!jupyter labextension list`
+
+  **Markdown cell:** `Number of cores:`
+
+  **Code cell:** `!grep ^processor /proc/cpuinfo | wc -l`
+
+  **Markdown cell:** `Memory:`
+  
+  **Code cell:** `!grep "^MemTotal:" /proc/meminfo`
+
+  **Markdown cell (copyright):**
+  ---   Copyright  Verily Life Sciences LLC
+  
+     Use of this source code is governed by a BSD-style
+     license that can be found in the LICENSE file or at
+     https://developers.google.com/open-source/licenses/bsd
+
+  For non-Python notebooks, only the copyright cell is appended (provenance cells are skipped).
+
+ 6. **Ensure provenance and copyright boilerplate** — Check that the notebook ends with the required boilerplate cells. If missing, append them. For Python notebooks, the provenance section includes:
+
+    **Markdown cell:**
+      Provenance
+  
+      Generate information about this notebook environment and the packages installed.
+
+    **Code cell:** `!date`
+
+    **Markdown cell:** `Conda and pip installed packages:`
+
+    **Code cell:** `!conda env export`
+
+    **Markdown cell:** `JupyterLab extensions:`
+    
+    **Code cell:** `!jupyter labextension list`
+
+    **Markdown cell:** `Number of cores:`
+
+    **Code cell:** `!grep ^processor /proc/cpuinfo | wc -l`
+
+    **Markdown cell:** `Memory:`
+    
+    **Code cell:** `!grep "^MemTotal:" /proc/meminfo`
+
+    **Markdown cell (copyright):**
+    ---   Copyright  Verily Life Sciences LLC
+    
+      Use of this source code is governed by a BSD-style
+      license that can be found in the LICENSE file or at
+      https://developers.google.com/open-source/licenses/bsd
+
+    For non-Python notebooks, only the copyright cell is appended (provenance cells are skipped).
+
+  7. **Generate HTML snapshots** — For each notebook, export an HTML snapshot **before** clearing outputs. Store the HTML file in a `notebook-snapshots/` directory that mirrors the notebook's relative path in the repo. For example:
+      `src/analysis/exploration.ipynb` → `notebook-snapshots/src/analysis/exploration.html`
+
+  8. **Clear cell outputs** — Strip all cell outputs and execution counts from each `.ipynb` file in place, preserving the notebook structure and source code.
+
+  9. **Stage snapshot files** — Add the generated HTML snapshots to the Git staging area alongside the cleaned notebooks so they are included in the commit.
+
+  10. **Report results** — Summarize linting findings, what was cleaned, and where HTML snapshots were saved.
 
   ## Usage
   
