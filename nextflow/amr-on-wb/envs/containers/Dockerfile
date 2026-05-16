@@ -20,6 +20,7 @@ RUN apt-get update -q && \
         subversion \
         wget \
         g++ \
+        make \
         libarchive13 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -59,5 +60,19 @@ RUN set -x && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy && \
     /opt/conda/bin/conda install -c conda-forge mamba && \
-    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3.9 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken numpy pysam pandas biopython matplotlib nextflow && \
+    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3.9 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken numpy pysam pandas biopython matplotlib nextflow=24 && \
     conda clean --all
+
+# Copy AMR++ bin scripts into the container
+COPY bin /opt/amrplusplus/bin
+RUN chmod +x /opt/amrplusplus/bin/*.py && \
+    chmod +x /opt/amrplusplus/bin/rarefaction && \
+    chmod +x /opt/amrplusplus/bin/resistome
+
+# Clone AmrPlusPlus_SNP for SNP verification (replaces empty dir copied from bin/)
+RUN rm -rf /opt/amrplusplus/bin/AmrPlusPlus_SNP && \
+    git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git /opt/amrplusplus/bin/AmrPlusPlus_SNP && \
+    chmod -R 755 /opt/amrplusplus/bin/AmrPlusPlus_SNP
+
+# Add bin directory to PATH
+ENV PATH="/opt/amrplusplus/bin:${PATH}"

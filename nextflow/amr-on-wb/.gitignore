@@ -1,0 +1,11 @@
+.nextflow/
+work/
+.nextflow.log*
+
+bin/AMRplusplus_SNP/
+test_results/
+
+.ipynb_checkpoints
+
+scripts/config/*.env
+!scripts/config/*.env.template
