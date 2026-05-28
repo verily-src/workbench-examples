@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSF Precision Oncology Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+        .header {
+            background: linear-gradient(135deg, #003262 0%, #005a9c 100%);
+            color: white; padding: 20px 32px; display: flex; align-items: center; gap: 16px;
+        }
+        .header h1 { font-size: 22px; font-weight: 600; }
+        .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+
+        .tabs {
+            display: flex; background: #003262; padding: 0 32px; gap: 0;
+            border-bottom: 2px solid #002142;
+        }
+        .tab {
+            padding: 12px 24px; color: rgba(255,255,255,0.65); cursor: pointer;
+            font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.05); }
+        .tab.active { color: white; border-bottom-color: #fdb515; }
+
+        .content { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .grid { display: grid; gap: 20px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .card {
+            background: white; border-radius: 10px; padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .card h3 { font-size: 14px; color: #666; margin-bottom: 12px; font-weight: 500; }
+        .card .big-number { font-size: 36px; font-weight: 700; color: #003262; }
+        .card .big-number .unit { font-size: 14px; color: #999; font-weight: 400; }
+
+        .full-width { grid-column: 1 / -1; }
+        .chart-container { min-height: 350px; }
+        .loading { text-align: center; padding: 60px; color: #999; }
+
+        table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.data-table th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0; }
+        table.data-table td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+        table.data-table tr:hover { background: #f8f9fa; }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: #e6f4ea; color: #137333; }
+        .badge-blue { background: #e3f2fd; color: #1565c0; }
+        .badge-orange { background: #fff3e0; color: #e65100; }
+        .badge-purple { background: #f3e5f5; color: #7b1fa2; }
+
+        @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>UCSF Precision Oncology Dashboard</h1>
+            <div class="subtitle">HNSCC Patient Cohort &middot; Tumor Genomics &middot; Drug-Target Matching</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">Cohort Overview</div>
+        <div class="tab" onclick="switchTab(1)">Mutation Landscape</div>
+        <div class="tab" onclick="switchTab(2)">Drug-Target Map</div>
+        <div class="tab" onclick="switchTab(3)">Treatment Outcomes</div>
+    </div>
+
+    <div class="content">
+        <!-- Tab 0: Cohort Overview -->
+        <div class="tab-panel active" id="panel-0">
+            <div class="grid grid-4" id="kpi-cards" style="margin-bottom: 20px;">
+                <div class="card"><h3>Total Patients</h3><div class="big-number" id="kpi-total">-</div></div>
+                <div class="card"><h3>Median Age</h3><div class="big-number" id="kpi-age">-</div></div>
+                <div class="card"><h3>HPV Positive</h3><div class="big-number" id="kpi-hpv">-</div></div>
+                <div class="card"><h3>Mutations Profiled</h3><div class="big-number" id="kpi-mutations">-</div></div>
+            </div>
+            <div class="grid grid-2">
+                <div class="card"><h3>Disease Stage Distribution</h3><div id="chart-stage" class="chart-container"></div></div>
+                <div class="card"><h3>Sex Distribution</h3><div id="chart-sex" class="chart-container"></div></div>
+                <div class="card"><h3>Treatment Modalities</h3><div id="chart-treatment" class="chart-container"></div></div>
+                <div class="card"><h3>Age Distribution</h3><div id="chart-age" class="chart-container"></div></div>
+                <div class="card"><h3>Primary Site</h3><div id="chart-site" class="chart-container"></div></div>
+                <div class="card"><h3>Smoking Status</h3><div id="chart-smoking" class="chart-container"></div></div>
+            </div>
+        </div>
+
+        <!-- Tab 1: Mutation Landscape -->
+        <div class="tab-panel" id="panel-1">
+            <div class="grid grid-2" style="margin-bottom: 20px;">
+                <div class="card"><h3>Total Mutations</h3><div class="big-number" id="kpi-mut-total">-</div></div>
+                <div class="card"><h3>Genes Mutated</h3><div class="big-number" id="kpi-genes">-</div></div>
+            </div>
+            <div class="grid grid-2">
+                <div class="card"><h3>Gene Mutation Frequency (% of cohort)</h3><div id="chart-gene-freq" class="chart-container" style="min-height:500px;"></div></div>
+                <div class="card"><h3>Co-occurrence Matrix (top 10 genes)</h3><div id="chart-cooccurrence" class="chart-container" style="min-height:500px;"></div></div>
+                <div class="card"><h3>Functional Impact</h3><div id="chart-impact" class="chart-container"></div></div>
+                <div class="card"><h3>Clinical Significance</h3><div id="chart-significance" class="chart-container"></div></div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Drug-Target Map -->
+        <div class="tab-panel" id="panel-2">
+            <div class="grid">
+                <div class="card full-width">
+                    <h3>Actionable Mutations &rarr; Targeted Therapies</h3>
+                    <div id="table-drug-map" class="loading">Loading...</div>
+                </div>
+                <div class="card full-width">
+                    <h3>Relevant Clinical Trials</h3>
+                    <div id="table-trials" class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Treatment Outcomes -->
+        <div class="tab-panel" id="panel-3">
+            <div class="grid grid-2">
+                <div class="card"><h3>Median OS by HPV Status (months)</h3><div id="chart-hpv-os" class="chart-container"></div></div>
+                <div class="card"><h3>Response Rate by HPV Status</h3><div id="chart-hpv-response" class="chart-container"></div></div>
+                <div class="card"><h3>Median OS: Mutated vs Wild-Type</h3><div id="chart-gene-os" class="chart-container"></div></div>
+                <div class="card"><h3>Outcomes by Disease Stage</h3><div id="chart-stage-outcomes" class="chart-container"></div></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const COLORS = {
+    primary: '#003262', gold: '#fdb515', blue: '#3182bd', green: '#2ca02c',
+    orange: '#e6550d', purple: '#756bb1', teal: '#17becf', red: '#d62728',
+    palette: ['#003262','#3182bd','#fdb515','#2ca02c','#e6550d','#756bb1','#17becf','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#1f77b4']
+};
+const LAYOUT_BASE = { margin: {t:30, b:40, l:50, r:20}, font: {family: 'Segoe UI, system-ui, sans-serif', size: 12}, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' };
+
+function switchTab(idx) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+    document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+async function loadCohortOverview() {
+    try {
+        const r = await fetch('api/cohort-overview');
+        const d = await r.json();
+
+        document.getElementById('kpi-total').textContent = d.total_patients;
+        document.getElementById('kpi-age').innerHTML = d.median_age + ' <span class="unit">years</span>';
+
+        const hpvPos = d.hpv_status['Positive'] || 0;
+        const hpvPct = Math.round(hpvPos / d.total_patients * 100);
+        document.getElementById('kpi-hpv').innerHTML = hpvPct + '<span class="unit">%</span>';
+
+        // Stage
+        const stages = ['I','II','III','IV'];
+        Plotly.newPlot('chart-stage', [{
+            x: stages, y: stages.map(s => d.stage_distribution[s] || 0),
+            type: 'bar', marker: { color: ['#a8d5e2','#6bb7d9','#3182bd','#003262'] }
+        }], {...LAYOUT_BASE, xaxis: {title: 'Stage'}, yaxis: {title: 'Patients'}});
+
+        // Sex
+        const sexLabels = Object.keys(d.sex_distribution);
+        Plotly.newPlot('chart-sex', [{
+            labels: sexLabels, values: sexLabels.map(k => d.sex_distribution[k]),
+            type: 'pie', marker: { colors: [COLORS.blue, COLORS.orange] },
+            textinfo: 'label+percent', hole: 0.4
+        }], {...LAYOUT_BASE});
+
+        // Treatment
+        const txLabels = Object.keys(d.treatment_counts);
+        Plotly.newPlot('chart-treatment', [{
+            y: txLabels, x: txLabels.map(k => d.treatment_counts[k]),
+            type: 'bar', orientation: 'h', marker: { color: COLORS.primary }
+        }], {...LAYOUT_BASE, xaxis: {title: 'Patients'}, yaxis: {automargin: true}});
+
+        // Age
+        const ageLabels = Object.keys(d.age_distribution);
+        Plotly.newPlot('chart-age', [{
+            x: ageLabels, y: ageLabels.map(k => d.age_distribution[k]),
+            type: 'bar', marker: { color: COLORS.blue }
+        }], {...LAYOUT_BASE, xaxis: {title: 'Age Group'}, yaxis: {title: 'Patients'}});
+
+        // Primary site
+        const siteLabels = Object.keys(d.primary_site);
+        Plotly.newPlot('chart-site', [{
+            labels: siteLabels, values: siteLabels.map(k => d.primary_site[k]),
+            type: 'pie', marker: { colors: COLORS.palette }, textinfo: 'label+percent', hole: 0.4
+        }], {...LAYOUT_BASE});
+
+        // Smoking
+        const smokeLabels = Object.keys(d.smoking_status);
+        Plotly.newPlot('chart-smoking', [{
+            labels: smokeLabels, values: smokeLabels.map(k => d.smoking_status[k]),
+            type: 'pie', marker: { colors: [COLORS.red, COLORS.orange, COLORS.green] },
+            textinfo: 'label+percent', hole: 0.4
+        }], {...LAYOUT_BASE});
+
+    } catch (e) { console.error('Cohort overview error:', e); }
+}
+
+async function loadMutationLandscape() {
+    try {
+        const r = await fetch('api/mutation-landscape');
+        const d = await r.json();
+
+        document.getElementById('kpi-mut-total').textContent = d.total_mutations.toLocaleString();
+        document.getElementById('kpi-genes').textContent = Object.keys(d.gene_frequency).length;
+
+        // Gene frequency bar chart
+        const genes = Object.keys(d.gene_percentage).sort((a,b) => d.gene_percentage[b] - d.gene_percentage[a]);
+        const pcts = genes.map(g => d.gene_percentage[g]);
+        const counts = genes.map(g => d.gene_frequency[g]);
+        Plotly.newPlot('chart-gene-freq', [{
+            y: genes.reverse(), x: pcts.reverse(),
+            type: 'bar', orientation: 'h',
+            marker: { color: pcts.map(p => p > 50 ? COLORS.red : p > 15 ? COLORS.orange : COLORS.blue) },
+            text: counts.reverse().map((c,i) => `${pcts[i]}% (${c} pts)`),
+            textposition: 'outside', hoverinfo: 'y+text'
+        }], {...LAYOUT_BASE, xaxis: {title: '% of Cohort', range: [0, Math.max(...pcts)*1.3]}, yaxis: {automargin: true}, margin: {...LAYOUT_BASE.margin, l: 80}});
+
+        // Co-occurrence heatmap
+        const topGenes = d.top_genes;
+        const z = topGenes.map(g1 => topGenes.map(g2 => d.cooccurrence[g1]?.[g2] || 0));
+        Plotly.newPlot('chart-cooccurrence', [{
+            z: z, x: topGenes, y: topGenes, type: 'heatmap',
+            colorscale: [[0,'#f7fbff'],[0.5,'#6baed6'],[1,'#08306b']],
+            text: z.map(row => row.map(v => v.toString())), texttemplate: '%{text}', hoverinfo: 'x+y+z'
+        }], {...LAYOUT_BASE, yaxis: {automargin: true}, xaxis: {automargin: true}});
+
+        // Functional impact
+        const impLabels = Object.keys(d.functional_impact);
+        Plotly.newPlot('chart-impact', [{
+            labels: impLabels, values: impLabels.map(k => d.functional_impact[k]),
+            type: 'pie', marker: { colors: COLORS.palette }, textinfo: 'label+percent', hole: 0.4
+        }], {...LAYOUT_BASE});
+
+        // Clinical significance
+        const sigLabels = Object.keys(d.clinical_significance);
+        Plotly.newPlot('chart-significance', [{
+            labels: sigLabels, values: sigLabels.map(k => d.clinical_significance[k]),
+            type: 'pie', marker: { colors: [COLORS.red, COLORS.orange, COLORS.blue, COLORS.green] },
+            textinfo: 'label+percent', hole: 0.4
+        }], {...LAYOUT_BASE});
+
+    } catch (e) { console.error('Mutation landscape error:', e); }
+}
+
+async function loadDrugTargetMap() {
+    try {
+        const r = await fetch('api/drug-target-map');
+        const d = await r.json();
+
+        // Gene-Drug table
+        const geneGroups = {};
+        d.gene_drug_map.forEach(item => {
+            if (!geneGroups[item.gene]) geneGroups[item.gene] = [];
+            geneGroups[item.gene].push(item);
+        });
+
+        let html = '<table class="data-table"><thead><tr><th>Gene</th><th>Patients</th><th>Drug</th><th>Mechanism</th><th>Status</th></tr></thead><tbody>';
+        const priorityGenes = ['RET','HRAS','PIK3CA','CDKN2A','NOTCH1','TP53','EGFR','PD-1','PD-L1'];
+        const sortedGenes = Object.keys(geneGroups).sort((a,b) => {
+            const ai = priorityGenes.indexOf(a), bi = priorityGenes.indexOf(b);
+            if (ai >= 0 && bi >= 0) return ai - bi;
+            if (ai >= 0) return -1;
+            if (bi >= 0) return 1;
+            return (geneGroups[b][0]?.patients_affected || 0) - (geneGroups[a][0]?.patients_affected || 0);
+        });
+
+        sortedGenes.forEach(gene => {
+            geneGroups[gene].forEach((item, idx) => {
+                const badge = item.fda_status === 'FDA-approved' ? 'badge-green' :
+                    item.fda_status === 'Breakthrough therapy' ? 'badge-purple' : 'badge-orange';
+                html += `<tr>
+                    ${idx === 0 ? `<td rowspan="${geneGroups[gene].length}"><strong>${gene}</strong></td><td rowspan="${geneGroups[gene].length}">${item.patients_affected}</td>` : ''}
+                    <td>${item.drug_name}</td><td>${item.mechanism}</td>
+                    <td><span class="badge ${badge}">${item.fda_status}</span></td></tr>`;
+            });
+        });
+        html += '</tbody></table>';
+        document.getElementById('table-drug-map').innerHTML = html;
+
+        // Trials table
+        let trialHtml = '<table class="data-table"><thead><tr><th>Trial ID</th><th>Drug</th><th>Phase</th><th>Cancer Type</th><th>Status</th></tr></thead><tbody>';
+        d.relevant_trials.forEach(t => {
+            const badge = t.enrollment_status === 'Recruiting' ? 'badge-green' :
+                t.enrollment_status === 'Active, not recruiting' ? 'badge-blue' : 'badge-orange';
+            trialHtml += `<tr><td>${t.trial_id}</td><td>${t.drug}</td><td>${t.phase}</td>
+                <td>${t.cancer_type}</td><td><span class="badge ${badge}">${t.enrollment_status}</span></td></tr>`;
+        });
+        trialHtml += '</tbody></table>';
+        document.getElementById('table-trials').innerHTML = trialHtml;
+
+    } catch (e) { console.error('Drug-target map error:', e); }
+}
+
+async function loadTreatmentOutcomes() {
+    try {
+        const r = await fetch('api/treatment-outcomes');
+        const d = await r.json();
+
+        // HPV OS comparison
+        const hpvKeys = Object.keys(d.hpv_survival);
+        Plotly.newPlot('chart-hpv-os', [
+            { x: hpvKeys, y: hpvKeys.map(k => d.hpv_survival[k].median_os), type: 'bar', name: 'Median OS',
+              marker: { color: [COLORS.green, COLORS.orange] },
+              text: hpvKeys.map(k => d.hpv_survival[k].median_os + ' mo'), textposition: 'outside' },
+            { x: hpvKeys, y: hpvKeys.map(k => d.hpv_survival[k].median_pfs), type: 'bar', name: 'Median PFS',
+              marker: { color: [COLORS.green, COLORS.orange].map(c => c + '88') },
+              text: hpvKeys.map(k => d.hpv_survival[k].median_pfs + ' mo'), textposition: 'outside' }
+        ], {...LAYOUT_BASE, barmode: 'group', yaxis: {title: 'Months'}, legend: {x: 0.7, y: 1}});
+
+        // HPV Response stacked bar
+        const responses = ['CR','PR','SD','PD'];
+        const respColors = {CR: COLORS.green, PR: COLORS.blue, SD: COLORS.orange, PD: COLORS.red};
+        const hpvTraces = responses.map(resp => ({
+            x: hpvKeys, y: hpvKeys.map(k => (d.hpv_response[k]?.[resp] || 0)),
+            type: 'bar', name: resp, marker: { color: respColors[resp] }
+        }));
+        Plotly.newPlot('chart-hpv-response', hpvTraces, {...LAYOUT_BASE, barmode: 'stack', yaxis: {title: 'Patients'}, legend: {x: 0.7, y: 1}});
+
+        // Gene OS comparison
+        const geneKeys = Object.keys(d.gene_outcomes);
+        Plotly.newPlot('chart-gene-os', [
+            { x: geneKeys, y: geneKeys.map(g => d.gene_outcomes[g].median_os), type: 'bar', name: 'Mutated',
+              marker: { color: COLORS.red }, text: geneKeys.map(g => d.gene_outcomes[g].median_os + ' mo'), textposition: 'outside' },
+            { x: geneKeys, y: geneKeys.map(g => d.gene_outcomes[g].non_mutated_median_os), type: 'bar', name: 'Wild-type',
+              marker: { color: COLORS.blue }, text: geneKeys.map(g => d.gene_outcomes[g].non_mutated_median_os + ' mo'), textposition: 'outside' }
+        ], {...LAYOUT_BASE, barmode: 'group', yaxis: {title: 'Median OS (months)'}, legend: {x: 0.7, y: 1}});
+
+        // Stage outcomes
+        const stageKeys = ['I','II','III','IV'].filter(s => d.stage_outcomes[s]);
+        Plotly.newPlot('chart-stage-outcomes', [
+            { x: stageKeys, y: stageKeys.map(s => d.stage_outcomes[s].median_os), type: 'bar', name: 'Median OS',
+              marker: { color: COLORS.primary }, text: stageKeys.map(s => d.stage_outcomes[s].median_os + ' mo'), textposition: 'outside' },
+            { x: stageKeys, y: stageKeys.map(s => d.stage_outcomes[s].median_pfs), type: 'bar', name: 'Median PFS',
+              marker: { color: COLORS.gold }, text: stageKeys.map(s => d.stage_outcomes[s].median_pfs + ' mo'), textposition: 'outside' }
+        ], {...LAYOUT_BASE, barmode: 'group', xaxis: {title: 'Stage'}, yaxis: {title: 'Months'}, legend: {x: 0.7, y: 1}});
+
+    } catch (e) { console.error('Treatment outcomes error:', e); }
+}
+
+// Load initial tab and lazy-load others
+loadCohortOverview();
+
+let loaded = {0: true, 1: false, 2: false, 3: false};
+const loaders = [loadCohortOverview, loadMutationLandscape, loadDrugTargetMap, loadTreatmentOutcomes];
+
+const origSwitchTab = switchTab;
+switchTab = function(idx) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+    document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+    if (!loaded[idx]) { loaded[idx] = true; loaders[idx](); }
+};
+</script>
+</body>
+</html>
