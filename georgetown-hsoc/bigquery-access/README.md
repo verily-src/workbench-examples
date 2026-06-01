@@ -27,10 +27,17 @@ All examples query the same dataset:
 
 ## Prerequisites
 
-The required libraries are pre-installed on Workbench JupyterLab environments:
+### JupyterLab
 
-- **Python:** `google-cloud-bigquery`, `pandas`
-- **R:** `bigrquery`
+The required libraries are pre-installed. No setup needed.
+
+### R Studio
+
+The R package `bigrquery` is pre-installed. To run the **Python** script from the R Studio terminal, install the BigQuery client first:
+
+```bash
+pip install google-cloud-bigquery db-dtypes pyarrow
+```
 
 ## What the Examples Do
 
@@ -43,16 +50,24 @@ Each example follows the same four steps:
 
 ## Running the Examples
 
-### Jupyter Notebook
+### Jupyter Notebook (JupyterLab)
 
 Open `bq_access.ipynb` in JupyterLab and select **Run > Run All Cells**.
 
-### Python Script
+### Python Script (JupyterLab or R Studio)
+
+From the terminal:
 
 ```bash
-python bigquery-access/bq_access.py
+python bq_access.py
 ```
 
-### R Script
+If you get `ImportError: cannot import name 'bigquery'`, install the dependencies first (see [Prerequisites](#prerequisites)).
 
-Open `bq_access.R` in RStudio and click **Source** (top-right of the editor pane) to run the entire script.
+### R Script (R Studio)
+
+Open `bq_access.R` in R Studio and click **Source** (top-right of the editor pane), or from the terminal:
+
+```bash
+Rscript bq_access.R
+```

@@ -10,6 +10,9 @@ Dataset: wb-crisp-bean-1269.temporary_data
 The dataset contains national wastewater pathogen surveillance data, including
 measurements from over 2,000 treatment plants across the United States.
 
+Prerequisites (pre-installed on JupyterLab, may need manual install on R Studio):
+    pip install google-cloud-bigquery db-dtypes pyarrow
+
 Usage:
     python bq_access.py
 """
