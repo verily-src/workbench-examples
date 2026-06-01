@@ -23,7 +23,11 @@ library(bigrquery)
 
 data_project    <- "wb-crisp-bean-1269"
 dataset         <- "temporary_data"
-billing_project <- Sys.getenv("GOOGLE_CLOUD_PROJECT", unset = data_project)
+
+billing_project <- Sys.getenv("GOOGLE_CLOUD_PROJECT", unset = "")
+if (billing_project == "") billing_project <- Sys.getenv("GOOGLE_PROJECT", unset = "")
+if (billing_project == "") billing_project <- trimws(system("gcloud config get-value project 2>/dev/null", intern = TRUE))
+if (billing_project == "") billing_project <- data_project
 
 # ---------------------------------------------------------------------------
 # 1. List Tables in the Dataset
