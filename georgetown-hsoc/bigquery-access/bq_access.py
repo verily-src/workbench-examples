@@ -14,17 +14,20 @@ Usage:
     python bq_access.py
 """
 
+import os
+
 from google.cloud import bigquery
 
 # ---------------------------------------------------------------------------
 # Setup
 # ---------------------------------------------------------------------------
 
-client = bigquery.Client()
-
-PROJECT = "wb-crisp-bean-1269"
+DATA_PROJECT = "wb-crisp-bean-1269"
+BILLING_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", DATA_PROJECT)
 DATASET = "temporary_data"
-DATASET_REF = f"{PROJECT}.{DATASET}"
+DATASET_REF = f"{DATA_PROJECT}.{DATASET}"
+
+client = bigquery.Client(project=BILLING_PROJECT)
 
 # ---------------------------------------------------------------------------
 # 1. List Tables in the Dataset

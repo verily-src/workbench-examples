@@ -21,8 +21,9 @@ library(bigrquery)
 # Setup
 # ---------------------------------------------------------------------------
 
-project <- "wb-crisp-bean-1269"
-dataset <- "temporary_data"
+data_project    <- "wb-crisp-bean-1269"
+dataset         <- "temporary_data"
+billing_project <- Sys.getenv("GOOGLE_CLOUD_PROJECT", unset = data_project)
 
 # ---------------------------------------------------------------------------
 # 1. List Tables in the Dataset
@@ -30,8 +31,8 @@ dataset <- "temporary_data"
 
 cat("== 1. List Tables ==\n\n")
 
-tables <- bq_dataset_tables(bq_dataset(project, dataset))
-cat("Found", length(tables), "table(s) in", paste0(project, ".", dataset), ":\n\n")
+tables <- bq_dataset_tables(bq_dataset(data_project, dataset))
+cat("Found", length(tables), "table(s) in", paste0(data_project, ".", dataset), ":\n\n")
 for (t in tables) {
   cat("  -", t$table, "\n")
 }
@@ -42,10 +43,10 @@ for (t in tables) {
 
 cat("\n== 2. Table Schema ==\n\n")
 
-table_ref <- bq_table(project, dataset, "all")
+table_ref <- bq_table(data_project, dataset, "all")
 meta      <- bq_table_meta(table_ref)
 
-cat("Table: ", paste(project, dataset, "all", sep = "."), "\n")
+cat("Table: ", paste(data_project, dataset, "all", sep = "."), "\n")
 cat("Rows:  ", format(as.numeric(meta$numRows), big.mark = ","), "\n")
 cat("Size:  ", round(as.numeric(meta$numBytes) / 1e6, 1), "MB\n")
 
@@ -62,9 +63,9 @@ for (f in fields) {
 
 cat("\n== 3. Preview Data ==\n\n")
 
-preview_sql <- sprintf("SELECT * FROM `%s.%s.all` LIMIT 10", project, dataset)
+preview_sql <- sprintf("SELECT * FROM `%s.%s.all` LIMIT 10", data_project, dataset)
 cat("Running:", preview_sql, "\n\n")
-df <- bq_table_download(bq_project_query(project, preview_sql))
+df <- bq_table_download(bq_project_query(billing_project, preview_sql))
 print(as.data.frame(df))
 
 # ---------------------------------------------------------------------------
@@ -82,9 +83,9 @@ SELECT
   MIN(sample_collection_date)    AS earliest_date,
   MAX(sample_collection_date)    AS latest_date
 FROM `%s.%s.all`
-", project, dataset)
+", data_project, dataset)
 
-summary_df <- bq_table_download(bq_project_query(project, summary_sql))
+summary_df <- bq_table_download(bq_project_query(billing_project, summary_sql))
 print(as.data.frame(summary_df))
 
 # ---------------------------------------------------------------------------
