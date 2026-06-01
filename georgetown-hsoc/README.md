@@ -6,15 +6,16 @@ Curated examples for Georgetown HSOC showing how to work with data and cloud res
 
 ## Getting Started
 
-### 1. Create a JupyterLab App
+### 1. Create an App
 
-In the [Workbench web UI](https://workbench.verily.com), navigate to your workspace and [create a cloud environment](https://support.workbench.verily.com/docs/guides/cloud_environments/environment_operations/#create-a-new-cloud-environment-jupyterlab-vertex-ai-workbench-instance) (JupyterLab app).
+In the [Workbench web UI](https://workbench.verily.com), navigate to your workspace and [create a new JupyterLab or R Analysis Envrionment app](https://support.workbench.verily.com/docs/guides/cloud_apps/app_operations/#create-a-new-cloud-app).
 
 ### 2. Clone This Repository
 
-Open a terminal in JupyterLab and run:
+Open a terminal and run:
 
 ```bash
+cd ~/repos
 git clone https://github.com/verily-src/workbench-examples.git
 cd workbench-examples
 git checkout georgetown-hsoc
