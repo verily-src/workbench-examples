@@ -55,6 +55,4 @@ python bigquery-access/bq_access.py
 
 ### R Script
 
-```bash
-Rscript bigquery-access/bq_access.R
-```
+Open `bq_access.R` in RStudio and click **Source** (top-right of the editor pane) to run the entire script.
