@@ -10,7 +10,7 @@ Authentication is handled automatically by the Workbench environment. No API key
 
 All examples query the same dataset:
 
-**`wb-crisp-bean-1269.temporary_data`** — National wastewater pathogen surveillance data with approximately 2.5 million rows across 10 columns:
+**`wb-crisp-bean-1269.world_soccer_games_wastewater_data`** — National wastewater pathogen surveillance data with approximately 2.5 million rows across 10 columns:
 
 | Column | Type | Description |
 |--------|------|-------------|

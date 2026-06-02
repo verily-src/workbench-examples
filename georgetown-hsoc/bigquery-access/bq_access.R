@@ -5,7 +5,7 @@
 # Demonstrates how to query a BigQuery dataset from a Verily Workbench cloud
 # environment using the bigrquery R package.
 #
-# Dataset: wb-crisp-bean-1269.temporary_data
+# Dataset: wb-crisp-bean-1269.world_soccer_games_wastewater_data
 #
 # The dataset contains national wastewater pathogen surveillance data,
 # including measurements from over 2,000 treatment plants across the
@@ -22,7 +22,7 @@ library(bigrquery)
 # ---------------------------------------------------------------------------
 
 data_project    <- "wb-crisp-bean-1269"
-dataset         <- "temporary_data"
+dataset         <- "world_soccer_games_wastewater_data"
 
 billing_project <- Sys.getenv("GOOGLE_CLOUD_PROJECT", unset = "")
 if (billing_project == "") billing_project <- Sys.getenv("GOOGLE_PROJECT", unset = "")

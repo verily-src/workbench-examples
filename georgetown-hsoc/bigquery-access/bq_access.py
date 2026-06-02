@@ -5,7 +5,7 @@ Accessing BigQuery Datasets in Workbench
 Demonstrates how to query a BigQuery dataset from a Verily Workbench cloud
 environment using the google-cloud-bigquery Python client library.
 
-Dataset: wb-crisp-bean-1269.temporary_data
+Dataset: wb-crisp-bean-1269.world_soccer_games_wastewater_data
 
 The dataset contains national wastewater pathogen surveillance data, including
 measurements from over 2,000 treatment plants across the United States.
@@ -27,7 +27,7 @@ from google.cloud import bigquery
 
 DATA_PROJECT = "wb-crisp-bean-1269"
 BILLING_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", DATA_PROJECT)
-DATASET = "temporary_data"
+DATASET = "world_soccer_games_wastewater_data"
 DATASET_REF = f"{DATA_PROJECT}.{DATASET}"
 
 client = bigquery.Client(project=BILLING_PROJECT)
