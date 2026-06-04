@@ -1,1 +1,0 @@
-This directory contains notebooks that query public OMOP datasets. They are intended to be used as examples for how to query the public OMOP dataset, and how to do basic visualizations.
