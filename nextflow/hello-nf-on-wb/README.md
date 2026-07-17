@@ -53,89 +53,101 @@ nextflow run main.nf -profile docker
 
 ## Run it on Verily Workbench (Google Batch)
 
+The same pipeline runs on Workbench two ways — the **CLI** (`wb nextflow`, e.g.
+from an app terminal) and the **Workflows UI**. The pipeline code is identical;
+only how you supply parameters differs.
+
+### The one rule: reference buckets by resource, never by name
+
+A Workbench bucket has two names: a **resource ID** you choose (e.g. `nf-scratch`)
+and a **physical name** with a workspace-specific suffix baked in (e.g.
+`nf-scratch-wb-tepid-acorn-3033`). That physical name is portable to no other
+workspace, so it must **never** appear in committed pipeline code. Instead:
+
+- `input` defaults to the bundled sample (resolved via `projectDir`), so a first
+  run needs no data staging.
+- `outdir` has no cloud default — you pass a `gs://` path at run time. On
+  `-profile workbench` the pipeline **fails fast** if `outdir` isn't a `gs://`
+  path (a relative outdir is written to the ephemeral orchestrator disk and lost).
+- You get that `gs://` path by resolving the **resource**, so the only
+  workspace-specific token anywhere is the resource ID you created:
+  `wb resource resolve --name=nf-scratch`.
+
 ### One-time workspace setup
 
-From a Workbench cloud environment (JupyterLab) in a workspace where you are an
-Owner/Admin:
+From a Workbench cloud environment in a workspace where you are an Owner/Admin:
 
 ```sh
-# A GCS bucket resource for the work directory and outputs.
-wb resource create gcs-bucket --id=nf-scratch
-
-# Point the wb CLI at your workspace so it can auto-detect project + service account.
-wb workspace set --id=<your-workspace-id>
+wb resource create gcs-bucket --id=nf-scratch   # bucket for work dir + outputs
+wb workspace set --id=<your-workspace-id>        # so wb can auto-detect context
 ```
 
 Workbench manages the rest (the `network`/`subnetwork` VPC, Cloud NAT, required
 APIs, and the Pet Service Account's IAM roles) — you do not create those.
 
-### Stage your input data
+### Option A — CLI (`wb nextflow`)
 
-Real pipelines read inputs from a bucket, not the Git repo — production data is
-often gigabytes and never lives beside the code. Upload the sample CSV (a
-stand-in for your real data) to your workspace bucket:
+`wb nextflow` injects `GOOGLE_CLOUD_PROJECT` and `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+for you. Resolve your bucket resource once, then launch — the bundled sample is
+used as input, results land in your bucket:
 
 ```sh
 export NF_WORK_BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"   # gs:// URL
-export NF_REGION="us-central1"                                             # match the bucket
 
-gcloud storage cp data/greetings.csv "${NF_WORK_BUCKET}/inputs/greetings.csv"
+wb nextflow run main.nf -profile workbench \
+  --outdir "${NF_WORK_BUCKET}/hello-nf-on-wb/results"
 ```
 
-### Launch
-
-Use the `wb nextflow` wrapper. It auto-sets `GOOGLE_CLOUD_PROJECT` and
-`GOOGLE_SERVICE_ACCOUNT_EMAIL` for you (do not hardcode them); you pass the
-`gs://` input and output:
+To run against **your own data**, stage it to the bucket and point `--input` at it:
 
 ```sh
-wb nextflow run main.nf \
-  -profile workbench \
+gcloud storage cp data/greetings.csv "${NF_WORK_BUCKET}/inputs/greetings.csv"
+
+wb nextflow run main.nf -profile workbench \
   --input  "${NF_WORK_BUCKET}/inputs/greetings.csv" \
   --outdir "${NF_WORK_BUCKET}/hello-nf-on-wb/results"
 ```
 
-Use `wb nextflow` (not plain `nextflow`): it is what makes `logsPath` and the
-Workbench environment variables resolve. If `NF_WORK_BUCKET` comes back empty,
-run `wb resource list` to refresh the workspace context cache, then re-export.
+(If `NF_WORK_BUCKET` comes back empty, run `wb resource list` to refresh the
+workspace context cache, then re-export.)
 
-Each `sayHello`/`convertToUpper` task becomes an independent Google Batch job.
-Watch them in the [Batch console](https://console.cloud.google.com/batch/jobs) or
-with `gcloud batch jobs list`. Add `-resume` to reuse cached tasks. Delete
-`${NF_WORK_BUCKET}/hello-nf-on-wb/scratch` when you no longer need to
-`-resume`.
+### Option B — Workbench UI (Workflows)
 
-> **Zero-setup smoke test.** Omit `--input` and the pipeline falls back to the
-> bundled `data/greetings.csv` (its `projectDir`-anchored default), letting you
-> confirm the Workbench wiring end-to-end before staging any data. For real work,
-> always pass a `gs://` `--input` — a bare relative path resolves against the
-> orchestrator's launch directory (not the pipeline) and fails with
-> `No such file or directory`.
+Register the pipeline under **Workflows** from its Git repo (main script
+`nextflow/hello-nf-on-wb/main.nf`, profile `workbench`).
 
-### Run from the Workbench UI
+The UI's params-file picker lists JSON/YAML files from a **bucket resource, not
+the Git repo**, so create a params file and upload it. A params file is read
+verbatim, so its paths must be `gs://`. Minimal run — `outdir` only, bundled
+input:
 
-You can also register this pipeline under **Workflows** from its Git repo (set the
-main script to `nextflow/hello-nf-on-wb/main.nf`, profile `workbench`).
-
-Stage your data to the bucket (above), then supply a params file with `gs://`
-paths. A params file is read verbatim and the run launches from a non-pipeline
-directory, so a relative `input` will **not** resolve (see the commented example
-in `test-params.yaml`):
-
-```yaml
-input:  "gs://<your-bucket>/inputs/greetings.csv"
-outdir: "gs://<your-bucket>/hello-nf-on-wb/results"
+```sh
+BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"
+printf 'outdir: "%s/hello-nf-on-wb/results"\n' "$BUCKET" > params.workbench.yaml
+gcloud storage cp params.workbench.yaml "$BUCKET/params/params.workbench.yaml"
 ```
 
-To just smoke-test the wiring, register and run with profile `workbench` and no
-params file — the bundled sample is used.
+Then in **Set up parameters**, choose your bucket resource and select
+`params/params.workbench.yaml`. To use your own data, upload the CSV (as in
+Option A) and add an `input: "gs://…"` line to the params file.
+
+### Where results and logs go
+
+- **Results:** your `outdir`, e.g. `…/hello-nf-on-wb/results/COLLECTED-greetings.txt`.
+- **Work dir:** scratch, under task-hash folders (UI-managed on the UI path).
+  Deletable after a successful run unless you plan to `-resume`. This is *not*
+  where to look for results.
+- **Logs:** the job's **Logs** tab in the UI, `logsPath` in the bucket, or Cloud
+  Logging. Watch running jobs in the
+  [Batch console](https://console.cloud.google.com/batch/jobs) or with
+  `gcloud batch jobs list`.
 
 ### Optional: a pinned container from Artifact Registry
 
 This example runs on the public `debian:stable-slim` image, so no build is
 required. For a real pipeline, push a pinned image to
-[Artifact Registry](https://cloud.google.com/artifact-registry) and point the
-profile at it:
+[Artifact Registry](https://cloud.google.com/artifact-registry) and set
+`NF_CONTAINER`:
 
 ```sh
 export NF_CONTAINER="us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/<repo>/<image>:<tag>"
@@ -143,28 +155,28 @@ export NF_CONTAINER="us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/<repo>/<
 
 ## How the `workbench` profile works
 
-All Workbench/GCP wiring is the `workbench` profile in `nextflow.config`, driven
-entirely by environment variables (12-Factor config), so nothing workspace-
-specific is committed:
+The `workbench` profile in `nextflow.config` holds all the Google Batch wiring,
+driven by environment variables (12-Factor config) so nothing workspace-specific
+is committed. It mirrors the
+[Workbench support docs example](https://support.workbench.verily.com/docs/guides/cli/cli_nextflow/).
 
 | Setting | Source | Purpose |
 | --- | --- | --- |
 | `process.executor = 'google-batch'` | fixed | Run each task as a Batch job |
-| `process.machineType` | fixed | Explicit VM size (Batch does not autosize) |
-| `google.project` | `GOOGLE_CLOUD_PROJECT` | Workspace GCP project |
-| `google.location` | `NF_REGION` | Where Batch VMs run |
-| `google.batch.serviceAccountEmail` | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Workbench Pet SA |
-| `workDir` | `NF_WORK_BUCKET` | GCS staging for tasks |
-| `logsPath` | `NF_WORK_BUCKET` | Workflow logs to the bucket (via `wb nextflow`) |
+| `process.machineType` | fixed | VM size (or set `cpus`/`memory` and let Batch derive it) |
+| `google.project` | `GOOGLE_CLOUD_PROJECT` (auto) | Workspace GCP project |
+| `google.location` | `NF_REGION` (default `us-central1`) | Region for Batch VMs; must match the workspace |
+| `google.batch.serviceAccountEmail` | `GOOGLE_SERVICE_ACCOUNT_EMAIL` (auto) | Workbench Pet SA |
+| `workDir` | `NF_WORK_BUCKET` | GCS scratch (UI-managed on the UI path) |
+| `logsPath` | `NF_WORK_BUCKET` | Workflow logs to the bucket |
 | `network` / `subnetwork` + `usePrivateAddress` | fixed | Workbench VPC; private VMs, NAT egress |
 | `process.container` | `NF_CONTAINER` (optional) | Task image |
 
-This profile mirrors the
-[Workbench support docs example](https://support.workbench.verily.com/docs/guides/cli/cli_nextflow/).
-It uses `env('VAR')` for portability. The docs' native alternative is to
-reference a bucket by its Workbench resource name directly — e.g.
-`workDir = '$WORKBENCH_nf-scratch/scratch'` — which the `wb nextflow` wrapper
-expands at launch. Either style works under `wb nextflow`.
+`env('VAR')` is the strict-parser-safe way to read these. On the CLI, `wb nextflow`
+also injects a `WORKBENCH_<resource-id>` variable per bucket resource (hyphens
+become underscores), so `workDir = "${env('WORKBENCH_nf_scratch')}/scratch"` is a
+valid native alternative to `NF_WORK_BUCKET` — at the cost of naming the resource
+in the config.
 
 ## See also
 

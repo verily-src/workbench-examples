@@ -23,6 +23,16 @@ include { convertToUpper }   from './modules/convertToUpper.nf'
 include { collectGreetings } from './modules/collectGreetings.nf'
 
 workflow {
+    // On Workbench, results must go to a bucket. A relative outdir is written to
+    // the ephemeral orchestrator disk and lost (the only durable copy ends up
+    // buried in the work dir), yet the run still reports success -- so fail fast
+    // instead. Reference the bucket by its resource, not a hardcoded name.
+    if (workflow.profile.contains('workbench') && !"${params.outdir}".startsWith('gs://')) {
+        error "On -profile workbench, set outdir to a gs:// path, e.g.\n" +
+              "  --outdir \"\$(wb resource resolve --name=nf-scratch)/hello-nf-on-wb/results\"\n" +
+              "(or set it in your params file). See README."
+    }
+
     // One item per CSV row (first column) -> the source of the fan-out.
     greeting_ch = Channel.fromPath(params.input)
                          .splitCsv()
