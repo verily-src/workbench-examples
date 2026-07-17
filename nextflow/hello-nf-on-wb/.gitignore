@@ -1,0 +1,5 @@
+# Nextflow run artifacts -- never commit these.
+.nextflow/
+.nextflow.log*
+work/
+results/
