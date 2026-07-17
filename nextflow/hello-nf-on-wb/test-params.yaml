@@ -1,2 +1,15 @@
+# Example params file (optional).
+#
+# The pipeline already defaults to the bundled data/greetings.csv (anchored to
+# the pipeline directory), so you do NOT need this file to run.
+#
+# Use it to point at your own data. Locally, a path relative to where you launch
+# works:
 input: "data/greetings.csv"
 outdir: "results"
+
+# On Workbench -- especially the Workflows UI, which launches from a different
+# working directory and reads the params file verbatim -- a relative path will
+# NOT resolve. Upload your CSV to the workspace bucket and use a gs:// URI:
+#   input: "gs://<your-bucket>/greetings.csv"
+#   outdir: "gs://<your-bucket>/hello-nf-on-wb/results"
