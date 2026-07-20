@@ -133,12 +133,15 @@ Option A) and add an `input: "gs://…"` line to the params file.
 
 ### Where results and logs go
 
-- **Results:** your `outdir`, e.g. `…/hello-nf-on-wb/results/COLLECTED-greetings.txt`.
-- **Work dir:** scratch, under task-hash folders (UI-managed on the UI path).
-  Deletable after a successful run unless you plan to `-resume`. This is *not*
-  where to look for results.
-- **Logs:** the job's **Logs** tab in the UI, `logsPath` in the bucket, or Cloud
-  Logging. Watch running jobs in the
+- **Results:** your `outdir` — the durable output, e.g.
+  `<bucket>/hello-nf-on-wb/results/COLLECTED-greetings.txt`. This is the only
+  place to look for results.
+- **Work dir:** scratch, under `<bucket>/…_job_<timestamp>/<run-id>/<hash>/`
+  folders (UI-managed on the UI path). Nextflow also leaves a *copy* of each
+  task's outputs here — do **not** mistake it for your results. Deletable after a
+  successful run unless you plan to `-resume`.
+- **Logs:** the job's **Logs** tab in the UI, the `nextflow.log` in the work dir,
+  or Cloud Logging. Watch running jobs in the
   [Batch console](https://console.cloud.google.com/batch/jobs) or with
   `gcloud batch jobs list`.
 
@@ -168,7 +171,6 @@ is committed. It mirrors the
 | `google.location` | `NF_REGION` (default `us-central1`) | Region for Batch VMs; must match the workspace |
 | `google.batch.serviceAccountEmail` | `GOOGLE_SERVICE_ACCOUNT_EMAIL` (auto) | Workbench Pet SA |
 | `workDir` | `NF_WORK_BUCKET` | GCS scratch (UI-managed on the UI path) |
-| `logsPath` | `NF_WORK_BUCKET` | Workflow logs to the bucket |
 | `network` / `subnetwork` + `usePrivateAddress` | fixed | Workbench VPC; private VMs, NAT egress |
 | `process.container` | `NF_CONTAINER` (optional) | Task image |
 
