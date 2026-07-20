@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 /*
- * hello-nf-on-wb
+ * hello-nf-on-vwb
  *
  * A minimal Nextflow pipeline, in the style of the official Nextflow "Hello"
  * training (https://training.nextflow.io), that runs unchanged on your laptop
@@ -32,7 +32,7 @@ workflow {
     if (workflow.profile.contains('verily_workbench')) {
         if (!"${params.outdir}".startsWith('gs://')) {
             error "On -profile verily_workbench, set outdir to a gs:// path, e.g.\n" +
-                  "  --outdir gs://<your-bucket>/hello-nf-on-wb/results\nSee README."
+                  "  --outdir gs://<your-bucket>/hello-nf-on-vwb/results\nSee README."
         }
         // Use .scheme, not string interpolation -- a remote Path renders as just
         // its object key ("/scratch") in a GString, losing the gs:// prefix.

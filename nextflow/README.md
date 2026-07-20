@@ -7,3 +7,12 @@ This example shows how to get started with [Nextflow](https://www.nextflow.io) o
     - how to install and run pipelines from [nf-core](https://nf-co.re/rnaseq) workflows, and 
     - how to leverage the [Google Life Sciences API](https://cloud.google.com/life-sciences/docs/concepts/introduction) as the workflow process executor.
 - Notebook snapshots are available if you'd like to preview the content of this notebook. To view a notebook snapshot, navigate to the "Notebook snapshots" folder in the Resources panel of this workspace. Then select a file and click the "Preview" button.
+
+## More Nextflow-on-Workbench resources
+
+The notebook above uses the older Google Life Sciences executor. For the current
+Google Batch approach, see:
+
+- [`hello-nf-on-vwb/`](./hello-nf-on-vwb/README.md) — a minimal, self-contained
+  pipeline (in the style of the official Nextflow training) showing the
+  `verily_workbench` (Google Batch) profile, a params file, and Workbench setup.
