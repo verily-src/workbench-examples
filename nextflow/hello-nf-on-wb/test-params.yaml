@@ -8,9 +8,10 @@
 input: "data/greetings.csv"
 outdir: "results"
 
-# On Workbench, use gs:// URIs (a relative path won't resolve -- the run launches
-# from a non-pipeline directory). The Workflows UI also lists params files from a
-# *bucket resource*, not this repo, so upload your params file too. See the
-# README "Run from the Workbench UI" section.
-# input:  "gs://<your-bucket>/inputs/greetings.csv"
-# outdir: "gs://<your-bucket>/hello-nf-on-wb/results"
+# On Workbench (-profile verily_workbench), use gs:// URIs (a relative path won't
+# resolve). The Workflows UI lists params files from a *bucket resource*, not this
+# repo, so upload your params file too. See the README "Run it on Workbench"
+# sections. Example (workDir is set for you by the UI):
+# outdir:   "gs://<your-bucket>/hello-nf-on-wb/results"
+# input:    "gs://<your-bucket>/inputs/greetings.csv"   # optional; omit to use bundled sample
+# location: "us-central1"                               # optional; must match your workspace region

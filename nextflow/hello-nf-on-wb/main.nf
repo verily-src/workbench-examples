@@ -15,7 +15,7 @@
  * Run it:
  *   nextflow run main.nf -profile standard                 # local, no container
  *   nextflow run main.nf -profile standard -params-file test-params.yaml
- *   nextflow run main.nf -profile workbench                # Google Batch (see README)
+ *   wb nextflow run main.nf -profile verily_workbench      # Google Batch (see README)
  */
 
 include { sayHello }         from './modules/sayHello.nf'
@@ -23,14 +23,25 @@ include { convertToUpper }   from './modules/convertToUpper.nf'
 include { collectGreetings } from './modules/collectGreetings.nf'
 
 workflow {
-    // On Workbench, results must go to a bucket. A relative outdir is written to
-    // the ephemeral orchestrator disk and lost (the only durable copy ends up
-    // buried in the work dir), yet the run still reports success -- so fail fast
-    // instead. Reference the bucket by its resource, not a hardcoded name.
-    if (workflow.profile.contains('workbench') && !"${params.outdir}".startsWith('gs://')) {
-        error "On -profile workbench, set outdir to a gs:// path, e.g.\n" +
-              "  --outdir \"\$(wb resource resolve --name=nf-scratch)/hello-nf-on-wb/results\"\n" +
-              "(or set it in your params file). See README."
+    // On Workbench, both the output and work dirs must be gs:// buckets. A
+    // relative path is written to the ephemeral orchestrator disk and lost (the
+    // durable copy ends up buried in the work dir), yet the run still reports
+    // success -- so fail fast instead. Reference the bucket by its resource, not
+    // a hardcoded name. workflow.workDir is the *resolved* work dir, so this
+    // passes on the UI (which sets it for you) and catches a missing --work_dir
+    // on the CLI.
+    if (workflow.profile.contains('verily_workbench')) {
+        if (!"${params.outdir}".startsWith('gs://')) {
+            error "On -profile verily_workbench, set outdir to a gs:// path, e.g.\n" +
+                  "  --outdir \"\$(wb resource resolve --name=<your-bucket-resource>)/hello-nf-on-wb/results\"\nSee README."
+        }
+        // Use .scheme, not string interpolation -- a remote Path renders as just
+        // its object key ("/scratch") in a GString, losing the gs:// prefix.
+        if (workflow.workDir.scheme != 'gs') {
+            error "On -profile verily_workbench, the work dir must be a gs:// path.\n" +
+                  "  CLI: --work_dir \"\$(wb resource resolve --name=<your-bucket-resource>)/scratch\"\n" +
+                  "  UI:  set for you automatically.\nSee README."
+        }
     }
 
     // One item per CSV row (first column) -> the source of the fan-out.
