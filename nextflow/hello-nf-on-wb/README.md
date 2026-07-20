@@ -185,7 +185,8 @@ workspace-specific is committed. It mirrors the
 | Setting | Source | Purpose |
 | --- | --- | --- |
 | `process.executor = 'google-batch'` | fixed | Run each task as a Batch job |
-| `process.machineType` | fixed | VM size (or set `cpus`/`memory` and let Batch derive it) |
+| `process.cpus` / `memory` (global block) | fixed | Task resources; Batch derives the VM type from these |
+| `google.batch.bootDiskSize` | fixed | VM boot disk size |
 | `google.project` | `env('GOOGLE_CLOUD_PROJECT')` (auto) | Workspace GCP project |
 | `google.location` | `params.location` (default `us-central1`) | Region for Batch VMs; must match the workspace |
 | `google.batch.serviceAccountEmail` | `env('GOOGLE_SERVICE_ACCOUNT_EMAIL')` (auto) | Workbench Pet SA |
