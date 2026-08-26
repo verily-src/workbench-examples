@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Save to Workbench Flow POC</title>
+</head>
+<body>
+
+<h1>Save to Workbench Flow POC</h1>
+
+<h2>Method 1: Direct GCS URIs</h2>
+<p>Import files directly from Google Cloud Storage using gs:// URIs. Files must be publicly accessible or accessible to your Workbench account.</p>
+<form action="/trigger-save-to-workbench-flow-gcs" method="GET">
+    <label for="gcs_uri">Google Cloud Storage URI (must be publicly accessible):</label><br>
+    <input type="text" id="gcs_uri" name="gcs_uri" value="gs://genomics-public-data/1000-genomes/other/sample_info/sample_info.csv" style="padding: 8px; margin: 10px 0; width: 600px;"><br>
+    <button type="submit" style="padding: 10px; background-color: #008CBA; color: white; border: none; cursor: pointer;">
+        Save to Workbench
+    </button>
+</form>
+
+<hr>
+
+<h2>Method 2: TSV Manifest URL</h2>
+<p>Import multiple files using a TSV manifest file. The manifest URL must be publicly accessible, but can contain signed URLs to private GCS resources.</p>
+<form action="/trigger-save-to-workbench-flow-tsv" method="GET">
+    <label for="tsv_url">TSV Manifest URL (must be publicly accessible):</label><br>
+    <input type="text" id="tsv_url" name="tsv_url" value="https://raw.githubusercontent.com/samhornstein/sample-tsv/refs/heads/main/sample.tsv" placeholder="https://raw.githubusercontent.com/samhornstein/sample-tsv/refs/heads/main/sample.tsv" style="padding: 8px; margin: 10px 0; width: 600px;"><br>
+    <button type="submit" style="padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+        Save to Workbench
+    </button>
+</form>
+
+<hr>
+
+<h2>Method 3: File Upload with Auto-Generated Manifest</h2>
+<p>Upload a file which will be stored in GCS, then automatically create a manifest with signed URL and import to Workbench.</p>
+<form action="/trigger-save-to-workbench-flow-upload-manifest" method="POST" enctype="multipart/form-data">
+    <label for="file4">Select file to upload:</label><br>
+    <input type="file" id="file4" name="file" style="padding: 8px; margin: 10px 0;"><br>
+    <button type="submit" style="padding: 10px; background-color: #9C27B0; color: white; border: none; cursor: pointer;">
+        Save to Workbench
+    </button>
+</form>
+
+</body>
+</html>
