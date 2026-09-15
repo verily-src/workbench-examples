@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "database": "MEGARes",
+  "version": "3.0.0",
+  "release_date": "2022-09-15",
+  "source_page": "https://www.meglab.org/megares/download/",
+  "publisher_git_commit": "b61577989f1f5b39888737301737e46f56432708",
+  "files": {
+    "reference.fasta": {
+      "url": "https://www.meglab.org/downloads/megares_v3.00/megares_database_v3.00.fasta",
+      "publisher_git_blob": "c1e6ebcb1b3fc40558450bce05c89f30912e7879",
+      "sha256": "2b6a732bb41810a23f1d18fd575645842c43159985e9cc9c794264df7a691401"
+    },
+    "annotations.csv": {
+      "url": "https://www.meglab.org/downloads/megares_v3.00/megares_annotations_v3.00.csv",
+      "publisher_git_blob": "c1d45139bededcb60b8ac4e620e9459e6d894b46",
+      "sha256": "81696e9f30917b8829c9e9eeea4e627fddcda293764ef6417b026884f089db96"
+    }
+  }
+}
