@@ -193,6 +193,17 @@ become underscores), so `workDir = "${env('WORKBENCH_nf_scratch')}/scratch"` is 
 valid native alternative to `NF_WORK_BUCKET`, at the cost of naming the resource
 in the config.
 
+## Reference databases
+
+Import the MEGARes 3.0.0 FASTA and matching annotations used by FloRes into a
+Workbench bucket with the [reference database example](docs/reference-databases.md).
+It verifies checksums, records provenance, and demonstrates Nextflow staging of
+both files from GCS. Try the bundled synthetic fixture locally:
+
+```sh
+nextflow run reference-databases/main.nf -profile standard
+```
+
 ## See also
 
 - Run an nf-core pipeline on Workbench:

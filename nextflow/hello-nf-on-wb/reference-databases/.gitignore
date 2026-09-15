@@ -1,0 +1,10 @@
+__pycache__/
+downloads/
+work/
+results/
+.nextflow/
+.nextflow.log*
+reference.fasta
+annotations.csv
+provenance.json
+params.workbench.json
