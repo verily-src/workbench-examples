@@ -129,6 +129,14 @@ gcloud storage cp data/greetings.csv "$BUCKET/inputs/greetings.csv"
   [Batch console](https://console.cloud.google.com/batch/jobs) or with
   `gcloud batch jobs list`.
 
+## Workbench development app
+
+Use the [Nextflow development app](docs/devcontainer.md) for a JupyterLab
+terminal with Nextflow, Java, `lsof`, and the Workbench MCP server. It includes a
+[Nextflow skill](skills/workbench-nextflow/SKILL.md) for your preferred agent and
+keeps the launch directory and cache in the app's persistent home volume.
+See the guide for setup, validation, and orchestrator lifecycle limits.
+
 ## 4. Run it on Workbench (CLI) — optional
 
 The same pipeline runs from the CLI with `wb nextflow`, for example from an app

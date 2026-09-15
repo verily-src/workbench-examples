@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wb": {
+      "command": "/opt/wb-mcp-server/wb-mcp-server",
+      "args": []
+    }
+  }
+}

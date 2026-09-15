@@ -1,0 +1,12 @@
+.git
+.DS_Store
+**/.nextflow*
+**/work/
+**/results/
+**/__pycache__/
+**/*.pyc
+# Local credentials and generated cloud params.
+.env
+.env.*
+**/params.workbench.yaml
+**/params.workbench.json
