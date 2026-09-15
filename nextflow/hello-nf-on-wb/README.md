@@ -47,10 +47,45 @@ nextflow run main.nf -profile standard --input data/greetings.csv
 
 ## 2. Run it locally with Docker
 
-The same pipeline, run inside a container. Docker must be running:
+The same pipeline, with each task run inside its process's container. Docker
+must be running:
 
 ```sh
 nextflow run main.nf -profile docker
+```
+
+### A container per process
+
+Each module declares its own image alongside its software requirements:
+
+```nextflow
+process convertToUpper {
+    container 'debian:12-slim'
+    // inputs, outputs, and script follow
+}
+```
+
+`sayHello`, `convertToUpper`, and `collectGreetings` each declare a container.
+They use the same Debian image because all three only need shell utilities.
+In a biological pipeline, each module can instead select the image containing
+its tool, such as a specific aligner or variant caller. This is the standard
+[Nextflow per-process container pattern](https://docs.seqera.io/nextflow/container#container-configuration),
+also illustrated by the upstream training's
+[`cowpy` module](https://github.com/nextflow-io/training/tree/master/hello-nextflow/solutions/6-hello-config/modules).
+
+The `standard` profile uses locally installed commands; `docker` enables local
+containers; `workbench` lets Google Batch run those same process images. The
+execution profiles do not assign a pipeline-wide image. `debian:12-slim` tracks
+Debian 12 updates; use an image digest when you need immutable software inputs.
+
+To override a module's image, use a `withName` process selector in your config.
+Earlier versions used `NF_CONTAINER` for a global image; set the image in the
+relevant module or process selector instead.
+
+You can preview the resolved images without launching tasks:
+
+```sh
+nextflow inspect main.nf -profile docker
 ```
 
 ## 3. Run it on Workbench (UI / Workflows)
@@ -81,7 +116,7 @@ From a Workbench cloud environment in a workspace where you are an Owner/Admin:
 
 ```sh
 wb resource create gcs-bucket --id=nf-scratch   # bucket for work dir + outputs
-wb workspace set --id=<your-workspace-id>        # so wb can auto-detect context
+wb workspace set --id='<your-workspace-id>'    # so wb can auto-detect context
 ```
 
 Workbench manages the rest: the `network`/`subnetwork` VPC, Cloud NAT, required
@@ -158,17 +193,6 @@ wb nextflow run main.nf -profile workbench \
 If `NF_WORK_BUCKET` comes back empty, run `wb resource list` to refresh the
 workspace context cache, then re-export.
 
-## Optional: a pinned container from Artifact Registry
-
-This example runs on the public `debian:stable-slim` image, so no build is
-required. For a real pipeline, push a pinned image to
-[Artifact Registry](https://cloud.google.com/artifact-registry) and set
-`NF_CONTAINER`:
-
-```sh
-export NF_CONTAINER="us-central1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/<repo>/<image>:<tag>"
-```
-
 ## How the `workbench` profile works
 
 The `workbench` profile in `nextflow.config` holds all the Google Batch wiring,
@@ -185,7 +209,7 @@ is committed. It mirrors the
 | `google.batch.serviceAccountEmail` | `GOOGLE_SERVICE_ACCOUNT_EMAIL` (auto) | Workbench Pet SA |
 | `workDir` | `NF_WORK_BUCKET` | GCS scratch (UI-managed on the UI path) |
 | `network` / `subnetwork` + `usePrivateAddress` | fixed | Workbench VPC; private VMs, NAT egress |
-| `process.container` | `NF_CONTAINER` (optional) | Task image |
+| `container` in each module | Module's software requirements | Task image, shared by Docker and Batch |
 
 `env('VAR')` is the strict-parser-safe way to read these. On the CLI, `wb nextflow`
 also injects a `WORKBENCH_<resource-id>` variable per bucket resource (hyphens
@@ -195,8 +219,5 @@ in the config.
 
 ## See also
 
-- Run an nf-core pipeline on Workbench:
-  [`../nf-core-workbench-profile/`](../nf-core-workbench-profile/README.md).
-- Convert a pipeline whose source code assumes local/HPC execution:
-  [`nextflow-to-workbench` skill](../../claude/skills/nextflow-to-workbench/SKILL.md).
-- Background talk: [Nextflow on Workbench slide outline](../nextflow-on-workbench-slides.md).
+- [Other Nextflow examples in this repository](../README.md).
+- [Official Hello Nextflow training source](https://github.com/nextflow-io/training/tree/master/hello-nextflow).
