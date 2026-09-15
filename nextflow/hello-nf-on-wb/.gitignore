@@ -3,3 +3,5 @@
 .nextflow.log*
 work/
 results/
+params.workbench.yaml
+params.workbench.json

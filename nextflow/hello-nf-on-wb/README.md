@@ -19,8 +19,11 @@ example mirrors its structure.
 ```
 hello-nf-on-wb/
 ├── main.nf              # the workflow (executor-agnostic)
-├── nextflow.config      # params + profiles: standard, docker, workbench
+├── nextflow.config      # execution profiles + optional artifact_registry override
 ├── test-params.yaml     # example inputs
+├── conf/                # example process-specific image override
+├── containers/          # Dockerfile for the Artifact Registry lesson
+├── docs/                # Artifact Registry guide
 ├── data/
 │   └── greetings.csv    # pipeline input
 └── modules/
@@ -78,14 +81,31 @@ containers; `workbench` lets Google Batch run those same process images. The
 execution profiles do not assign a pipeline-wide image. `debian:12-slim` tracks
 Debian 12 updates; use an image digest when you need immutable software inputs.
 
-To override a module's image, use a `withName` process selector in your config.
-Earlier versions used `NF_CONTAINER` for a global image; set the image in the
-relevant module or process selector instead.
+To change one module without editing its code, use a `withName` selector in a
+config file. The `artifact_registry` profile includes this example from
+[`conf/artifact-registry.config`](conf/artifact-registry.config):
 
-You can preview the resolved images without launching tasks:
+```nextflow
+process {
+    withName: convertToUpper {
+        container = params.upper_container
+    }
+}
+```
+
+Run with `-profile docker,artifact_registry --upper_container <image>` locally,
+or `-profile workbench,artifact_registry` and an `upper_container` entry in your
+Workbench params file. The other two processes keep their own images. Follow
+the [Artifact Registry lesson](docs/artifact-registry.md) to build and upload the
+example image. Earlier versions used `NF_CONTAINER` to set a global image;
+use the process-specific override for this lesson instead.
+
+You can preview resolved images without launching tasks:
 
 ```sh
 nextflow inspect main.nf -profile docker
+nextflow inspect main.nf -profile docker,artifact_registry \
+  --upper_container '<image>'
 ```
 
 ## 3. Run it on Workbench (UI / Workflows)
