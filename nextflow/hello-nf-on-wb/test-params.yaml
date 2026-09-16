@@ -8,9 +8,9 @@
 input: "data/greetings.csv"
 outdir: "results"
 
-# On Workbench, use gs:// URIs (a relative path won't resolve -- the run launches
-# from a non-pipeline directory). The Workflows UI also lists params files from a
+# For managed Workflows, select workbench_managed and use gs:// URIs.
+# Relative paths resolve from the managed launch directory, not the pipeline. The Workflows UI also lists params files from a
 # *bucket resource*, not this repo, so upload your params file too. See the
-# README "Run from the Workbench UI" section.
+# README "Run through managed Workbench Workflows" section.
 # input:  "gs://<your-bucket>/inputs/greetings.csv"
 # outdir: "gs://<your-bucket>/hello-nf-on-wb/results"
