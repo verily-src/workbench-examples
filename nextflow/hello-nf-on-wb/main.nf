@@ -23,18 +23,26 @@ include { convertToUpper }   from './modules/convertToUpper.nf'
 include { collectGreetings } from './modules/collectGreetings.nf'
 
 workflow {
-    // On Workbench, results must go to a bucket. A relative outdir is written to
-    // the ephemeral orchestrator disk and lost (the only durable copy ends up
-    // buried in the work dir), yet the run still reports success -- so fail fast
-    // instead. Reference the bucket by its resource, not a hardcoded name.
-    if (workflow.profile.contains('workbench') && !"${params.outdir}".startsWith('gs://')) {
-        error "On -profile workbench, set outdir to a gs:// path, e.g.\n" +
-              "  --outdir \"\$(wb resource resolve --name=nf-scratch)/hello-nf-on-wb/results\"\n" +
-              "(or set it in your params file). See README."
+    def selectedProfiles = workflow.profile.tokenize(',')
+    if (selectedProfiles.contains('workbench') && selectedProfiles.contains('workbench_managed')) {
+        error "Choose workbench (direct CLI) OR workbench_managed (Workflows), not both."
+    }
+    if (selectedProfiles.any { it in ['workbench', 'workbench_managed'] }
+            && !"${params.outdir}".startsWith('gs://')) {
+        error "Set --outdir to a durable gs:// path (or set outdir in your params file). See README."
+    }
+    if (selectedProfiles.contains('workbench')) {
+        if (!(System.getenv('NF_WORK_BUCKET') ?: '').startsWith('gs://')) {
+            error "Resolve a scratch bucket into NF_WORK_BUCKET before using the workbench profile."
+        }
+        if (!System.getenv('GOOGLE_CLOUD_PROJECT') || !System.getenv('GOOGLE_SERVICE_ACCOUNT_EMAIL')
+                || !(System.getenv('NF_REGION') ?: System.getenv('PROJECT_DEFAULT_REGION'))) {
+            error "Use wb nextflow in a GCP workspace so project, service account and region are available."
+        }
     }
 
     // One item per CSV row (first column) -> the source of the fan-out.
-    greeting_ch = Channel.fromPath(params.input)
+    greeting_ch = Channel.fromPath(params.input, checkIfExists: true)
                          .splitCsv()
                          .map { row -> row[0] }
 

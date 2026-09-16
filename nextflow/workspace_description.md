@@ -1,47 +1,75 @@
-# Overview
+# Nextflow on Verily Workbench
 
-This notebook shows how to get started with [Nextflow](https://www.nextflow.io) on Verily Workbench.
+Use Nextflow to run a small greeting pipeline or two RNA-seq examples on Google
+Batch. Start with the [directory README](https://github.com/verily-src/workbench-examples/blob/main/nextflow/README.md) to choose between managed
+Workbench Workflows and direct execution from a cloud app.
 
-# How do I get started?
+## 1. Prepare a GCP workspace
 
-## Step 0: _Duplicate_ this workspace
+Use an existing GCP-backed workspace or duplicate a demonstration workspace if
+one has been shared with you. Duplication is optional. Check that you can use its
+cloud apps and write to the buckets chosen for scratch and results.
 
-- *Duplicate* this workspace. You can do that via the 'three-dot' menu in the upper right of the workspace. Duplicating this workspace ensures three Git repositories required for these examples will be automatically cloned when you create a [cloud environment](https://terra-docs.api.verily.com/docs/reference/glossary/#cloud-environment).
+For the RNA-seq notebook, identify two bucket resource IDs (they may refer to
+the same bucket). Resource IDs are Workbench names, not physical GCS bucket names:
 
-   The required repositories which will be cloned include:
-  1. [`workbench-examples` example repo](https://github.com/verily-src/workbench-examples): Contains JupyterLab notebook `nextflow_examples.ipynb` which demonstrates how to configure and run Nextflow workflows in Verily Workbench.
-  2. [`rnaseq-nf` repo](https://github.com/nextflow-io/rnaseq-nf): Contains a Nextflow RNASeq workflow specification and associated human genomic input data.
-  3. [`test-datasets` repo](https://github.com/nf-core/test-datasets): For each workflow in the `nf-core` collection, this repo has a branch with appropriate, workflow-specific test data.
-  > **Note**: If you do not have a GitHub account, then you can clone each repo manually after you've created the cloud environment.
+- **Scratch:** task working files needed for debugging and resume.
+- **Results:** durable published files and MultiQC reports.
 
+If you need buckets, [workspace_setup.ipynb](https://github.com/verily-src/workbench-examples/blob/main/workspace_setup.ipynb) creates
+`ws_files` and `ws_files_autodelete_after_two_weeks`. The notebook defaults to
+`ws_files` for both uses. Do not select the autodelete bucket for results you want
+to keep. Its two-week retention also limits how long scratch files can be reused.
+You can skip the setup notebook's BigQuery section for these examples.
 
-## Step 1: Preview prior runs of the relevant notebooks.
+Alternatively, create a bucket in the intended workspace using the CLI:
 
-To gain a better understanding of the setup and analysis included in this demonstration workspace, previews of this notebook that include cell outputs are provided. Navigate to your workspace's Resources tab, then select the "Notebook snapshots" folder. To view a notebook snapshot, select a file in said folder and click the "Preview" button.
+```sh
+wb resource create gcs-bucket --workspace=<workspace-id> --id=nf-results
+wb resource resolve --workspace=<workspace-id> --id=nf-results
+```
 
-## Step 2: Create a Verily Workbench cloud environment and run a setup notebook.
+Set the notebook's bucket variables to the resource IDs you actually use.
 
-Create an Verily Workbench [cloud environment](https://terra-docs.api.verily.com/docs/reference/glossary/#cloud-environment) by navigating to the "Environments" tab of the workspace. You can use the configuration defaults.
+## 2. Open a JupyterLab cloud app
 
-Launch the environment once it's running, and then run the notebook [workspace_setup.ipynb](https://github.com/verily-src/workbench-examples/blob/main/workspace_setup.ipynb). Its repo, `workbench-examples`, which is defined as a workspace Git repository, should be automatically cloned to your Verily Workbench cloud environment, and you should be able to navigate to the notebook in the JupyterLab file browser. Look for the `workbench-examples` subdirectory.
+Create or start a JupyterLab cloud app from your workspace's cloud app controls.
+For the notebook path, it needs Git, Python 3, the Workbench CLI and a local
+Nextflow installation. Follow the [Nextflow installation guide](https://www.nextflow.io/docs/stable/install.html)
+if Nextflow is absent; the notebook uses version 25.10.2. Configure and authenticate
+the Workbench CLI as described in [basic usage](https://support.workbench.verily.com/docs/guides/cli/basic_usage/).
 
-**If you do not see the `workbench-examples` subdirectory**, open a Terminal window on the notebook server (under the **File** menu) and run:
->  ```sh
-  git clone https://github.com/verily-src/workbench-examples.git```
+If this repository was not cloned automatically, use a terminal:
 
-## Step 3: Run the Nextflow examples.
+```sh
+git clone https://github.com/verily-src/workbench-examples.git
+```
 
-Two examples are provided in `nextflow_examples.ipynb`. You will find this notebook in [the `nextflow` directory of the `workbench-examples` repository](https://github.com/https://github.com/verily-src/workbench-examples/tree/main/nextflow).  As mentioned above, its repo, `workbench-examples`, will be automatically cloned to your Verily Workbench cloud environment, and you should be able to navigate to the notebook in the JupyterLab file browser. Before running either example, you'll need to run the Setup section.
+Open `workbench-examples/nextflow/nextflow_examples.ipynb`. Public pipeline
+repositories are fetched by the notebook over HTTPS; no GitHub SSH setup or
+preconfigured repository resources are needed.
 
-- The first example demonstrates running a Nextflow RNASeq workflow on human gut data.
-- The second example demonstrates running the [`nf-core`](https://nf-co.re/) RNASeq pipeline on yeast genome data.
+## 3. Choose an example
 
-The examples provided are independent of one another (meaning you can run only the second example if desired, without having to execute the first example).
+- **First Nextflow run:** follow [hello-nf-on-wb](https://github.com/verily-src/workbench-examples/blob/main/nextflow/hello-nf-on-wb/README.md). Its
+  managed Workflows path does not require a running notebook app.
+- **RNA-seq:** run the notebook's shared setup, then either or both examples.
+  Example 1 uses a small chicken dataset with `rnaseq-nf`; Example 2 uses the
+  yeast test profile of `nf-core/rnaseq` 3.22.2. Keep the cloud app running until
+  the selected direct CLI run finishes.
 
-## Step 4: View MultiQC reports produced.
+Run All launches both RNA-seq examples once the settings are filled in. It does
+not resume runs or delete scratch files. Compute and storage incur charges;
+actual usage depends on the workspace and pipeline.
 
-Running each example will result in the creation of a MultiQC report. 
+## 4. Inspect results
 
-To preview what reports can be expected to look like, navigate to your workspace's Resources tab, then select the "Report previews" folder. To view a report, select a file in said folder and click the "Preview" button.
+The notebook verifies and downloads each MultiQC report from the result bucket.
+Open the downloaded HTML in a browser. A report's presence alone does not prove
+that a new run succeeded: also check the current run's exit status and logs.
+Notebook snapshots and report-preview folders are optional workspace resources;
+these instructions do not depend on them.
 
-Please note that a warning about Javascript being disabled is expected; instructions are provided in the notebook to address this for the actual reports you produce.
+For configuration, monitoring and troubleshooting, see the
+[managed Workflows guide](https://support.workbench.verily.com/docs/guides/workflows/nextflow/)
+and [Nextflow CLI guide](https://support.workbench.verily.com/docs/guides/cli/cli_nextflow/).
