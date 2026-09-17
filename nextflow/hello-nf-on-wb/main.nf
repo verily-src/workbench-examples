@@ -29,7 +29,7 @@ workflow {
     // instead. Reference the bucket by its resource, not a hardcoded name.
     if (workflow.profile.contains('workbench') && !"${params.outdir}".startsWith('gs://')) {
         error "On -profile workbench, set outdir to a gs:// path, e.g.\n" +
-              "  --outdir \"\$(wb resource resolve --name=nf-scratch)/hello-nf-on-wb/results\"\n" +
+              "  --outdir \"\$(wb resource resolve --name=nf-data)/hello-nf-on-wb/results\"\n" +
               "(or set it in your params file). See README."
     }
 
