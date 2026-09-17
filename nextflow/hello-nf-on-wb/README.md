@@ -60,9 +60,9 @@ code is identical to the local runs; only how you supply parameters changes.
 
 ### Reference buckets by resource, not by name
 
-A Workbench bucket has two names: a resource ID you choose (e.g. `nf-scratch`) and
+A Workbench bucket has two names: a resource ID you choose (e.g. `nf-data`) and
 a physical name with a workspace-specific suffix (e.g.
-`nf-scratch-wb-tepid-acorn-3033`). The physical name is not portable to other
+`nf-data-wb-tepid-acorn-3033`). The physical name is not portable to other
 workspaces, so it must never appear in committed pipeline code. Instead:
 
 - `input` defaults to the bundled sample (resolved via `projectDir`), so a first
@@ -73,15 +73,15 @@ workspaces, so it must never appear in committed pipeline code. Instead:
   lost.
 - You get the `gs://` path by resolving the resource, so the only
   workspace-specific token anywhere is the resource ID you created:
-  `wb resource resolve --name=nf-scratch`.
+  `wb resource resolve --name=nf-data`.
 
 ### One-time workspace setup
 
 From a Workbench cloud environment in a workspace where you are an Owner/Admin:
 
 ```sh
-wb resource create gcs-bucket --id=nf-scratch   # bucket for work dir + outputs
-wb workspace set --id=<your-workspace-id>        # so wb can auto-detect context
+wb resource create gcs-bucket --id=nf-data   # bucket for work dir + outputs
+wb workspace set --id='<your-workspace-id>'    # so wb can auto-detect context
 ```
 
 Workbench manages the rest: the `network`/`subnetwork` VPC, Cloud NAT, required
@@ -98,7 +98,7 @@ so its paths must be `gs://`. For a minimal run, set `outdir` and let the pipeli
 use the bundled input:
 
 ```sh
-BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"
+BUCKET="$(wb resource resolve --name=nf-data | xargs)"
 printf 'outdir: "%s/hello-nf-on-wb/results"\n' "$BUCKET" > params.workbench.yaml
 gcloud storage cp params.workbench.yaml "$BUCKET/params/params.workbench.yaml"
 ```
@@ -139,7 +139,7 @@ for you. Resolve your bucket resource once, then launch. The bundled sample is
 used as input and results land in your bucket:
 
 ```sh
-export NF_WORK_BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"   # gs:// URL
+export NF_WORK_BUCKET="$(wb resource resolve --name=nf-data | xargs)"   # gs:// URL
 
 wb nextflow run main.nf -profile workbench \
   --outdir "${NF_WORK_BUCKET}/hello-nf-on-wb/results"
@@ -189,7 +189,7 @@ is committed. It mirrors the
 
 `env('VAR')` is the strict-parser-safe way to read these. On the CLI, `wb nextflow`
 also injects a `WORKBENCH_<resource-id>` variable per bucket resource (hyphens
-become underscores), so `workDir = "${env('WORKBENCH_nf_scratch')}/scratch"` is a
+become underscores), so `workDir = "${env('WORKBENCH_nf_data')}/scratch"` is a
 valid native alternative to `NF_WORK_BUCKET`, at the cost of naming the resource
 in the config.
 
