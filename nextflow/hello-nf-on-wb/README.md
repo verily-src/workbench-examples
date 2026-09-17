@@ -19,8 +19,11 @@ example mirrors its structure.
 ```
 hello-nf-on-wb/
 ├── main.nf              # the workflow (executor-agnostic)
-├── nextflow.config      # params + profiles: standard, docker, workbench
+├── nextflow.config      # execution profiles + optional artifact_registry override
 ├── test-params.yaml     # example inputs
+├── conf/                # example process-specific image override
+├── containers/          # Dockerfile for the Artifact Registry lesson
+├── docs/                # Artifact Registry guide
 ├── data/
 │   └── greetings.csv    # pipeline input
 └── modules/
@@ -78,9 +81,10 @@ containers; `workbench` lets Google Batch run those same process images. The
 execution profiles do not assign a pipeline-wide image. `debian:12-slim` tracks
 Debian 12 updates; use an image digest when you need immutable software inputs.
 
-To override a module's image, use a `withName` process selector in your config.
-Earlier versions used `NF_CONTAINER` for a global image; set the image in the
-relevant module or process selector instead.
+To use your own image for `convertToUpper`, follow the three-step
+[Artifact Registry example](docs/artifact-registry.md): create a repository,
+build and upload with Cloud Build, then run the workflow with that image.
+The `artifact_registry` profile applies `upper_container` only to that process.
 
 You can preview the resolved images without launching tasks:
 

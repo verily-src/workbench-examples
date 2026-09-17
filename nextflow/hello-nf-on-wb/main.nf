@@ -23,6 +23,11 @@ include { convertToUpper }   from './modules/convertToUpper.nf'
 include { collectGreetings } from './modules/collectGreetings.nf'
 
 workflow {
+    if (workflow.profile.tokenize(',').contains('artifact_registry') && !params.upper_container) {
+        error "On -profile artifact_registry, set --upper_container to your image tag or digest " +
+              "(or set upper_container in your params file). See docs/artifact-registry.md."
+    }
+
     // On Workbench, results must go to a bucket. A relative outdir is written to
     // the ephemeral orchestrator disk and lost (the only durable copy ends up
     // buried in the work dir), yet the run still reports success -- so fail fast
