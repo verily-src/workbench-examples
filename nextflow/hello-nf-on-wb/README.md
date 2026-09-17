@@ -81,31 +81,15 @@ containers; `workbench` lets Google Batch run those same process images. The
 execution profiles do not assign a pipeline-wide image. `debian:12-slim` tracks
 Debian 12 updates; use an image digest when you need immutable software inputs.
 
-To change one module without editing its code, use a `withName` selector in a
-config file. The `artifact_registry` profile includes this example from
-[`conf/artifact-registry.config`](conf/artifact-registry.config):
+To use your own image for `convertToUpper`, follow the three-step
+[Artifact Registry example](docs/artifact-registry.md): create a repository,
+build and upload with Cloud Build, then run the workflow with that image.
+The `artifact_registry` profile applies `upper_container` only to that process.
 
-```nextflow
-process {
-    withName: convertToUpper {
-        container = params.upper_container
-    }
-}
-```
-
-Run with `-profile docker,artifact_registry --upper_container <image>` locally,
-or `-profile workbench,artifact_registry` and an `upper_container` entry in your
-Workbench params file. The other two processes keep their own images. Follow
-the [Artifact Registry lesson](docs/artifact-registry.md) to build and upload the
-example image. Earlier versions used `NF_CONTAINER` to set a global image;
-use the process-specific override for this lesson instead.
-
-You can preview resolved images without launching tasks:
+You can preview the resolved images without launching tasks:
 
 ```sh
 nextflow inspect main.nf -profile docker
-nextflow inspect main.nf -profile docker,artifact_registry \
-  --upper_container '<image>'
 ```
 
 ## 3. Run it on Workbench (UI / Workflows)
