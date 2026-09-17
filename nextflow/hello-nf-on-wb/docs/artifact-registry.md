@@ -34,46 +34,37 @@ and let Nextflow supply the task command. The build context is just
 ## 2. Select the workspace and repository
 
 Use a Workbench app terminal, or a local terminal with `gcloud` and `wb`
-installed. Cloud Build runs the image build remotely. Select your workspace:
+installed and authenticated. Select your workspace:
 
 ```sh
-wb status
 wb workspace set --id='<your-workspace-id>'
 wb workspace describe
 ```
 
-Copy the workspace's Google Cloud project ID from `wb workspace describe` or
-the Workbench overview page. In a Workbench app it is also available as
-`GOOGLE_CLOUD_PROJECT`. Set these shell variables using your own values:
+Set `AR_PROJECT` to the workspace's Google Cloud project ID shown above and
+choose a new or existing Docker repository name. Read the region directly from
+the workspace:
 
 ```sh
 export AR_PROJECT='<workspace-google-cloud-project-id>'
-export AR_REGION='us-central1'  # use your workspace's region
+export AR_REGION="$(wb workspace describe | awk '$1 == "terra-default-location:" {print $2}')"
 export AR_REPOSITORY='nextflow-tools'
 export AR_HOST="${AR_REGION}-docker.pkg.dev"
 export IMAGE_PATH="${AR_HOST}/${AR_PROJECT}/${AR_REPOSITORY}/hello-nf-tools"
 export IMAGE_TAG="${IMAGE_PATH}:1.0.0"
 ```
 
-Use an existing Docker repository if your team has one. Otherwise, an authorized
-workspace administrator can create it as in the
-[Workbench container guide](https://support.workbench.verily.com/docs/guides/cloud_apps/advanced_app_usage/create_container_images/#create-an-artifact-registry-repository):
+If the repository does not already exist, create it once:
 
 ```sh
-wb gcloud artifacts repositories list \
-  --project="$AR_PROJECT" --location="$AR_REGION"
-
-# Run once, only when the repository does not already exist.
-wb gcloud artifacts repositories create "$AR_REPOSITORY" \
-  --project="$AR_PROJECT" --location="$AR_REGION" \
+gcloud artifacts repositories create "$AR_REPOSITORY" \
+  --project="$AR_PROJECT" \
   --repository-format=docker \
+  --location="$AR_REGION" \
   --description='Task images for Nextflow examples'
 ```
 
-Repository creation requires permissions beyond pushing images, for example
-Artifact Registry Administrator. If the API is disabled, have the workspace
-administrator enable `artifactregistry.googleapis.com`. See Google's
-[Artifact Registry setup guide](https://docs.cloud.google.com/artifact-registry/docs/docker/store-docker-container-images).
+The image URI and Cloud Build commands below use this same workspace region.
 
 ## 3. Check the build and runtime identities
 
