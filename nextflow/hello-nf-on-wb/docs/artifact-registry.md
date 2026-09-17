@@ -6,7 +6,7 @@ No local Docker installation is needed.
 
 Run these commands in the same Workbench app terminal, from
 `nextflow/hello-nf-on-wb/`, with your workspace selected and the
-[`nf-scratch` bucket](../README.md#one-time-workspace-setup) created.
+[`nf-data` bucket](../README.md#one-time-workspace-setup) created.
 
 ## 1. Create a repository
 
@@ -33,7 +33,7 @@ Reuse the workspace values for the image address and the scratch bucket for
 build source and logs:
 
 ```sh
-BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"
+BUCKET="$(wb resource resolve --name=nf-data | xargs)"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT}/nextflow-tools/hello-nf-tools:1.0.0"
 
 gcloud builds submit containers/greetings \
