@@ -34,7 +34,7 @@ class ReferenceImportTests(unittest.TestCase):
         self.manifest_path = self.root / "manifest.json"
         self.write_manifest()
         self.args = argparse.Namespace(directory=self.directory, manifest=self.manifest_path,
-                                       bucket_resource="nf-scratch", prefix="references")
+                                       bucket_resource="nf-data", prefix="references")
 
     def write_manifest(self):
         self.manifest_path.write_bytes(importer.json_bytes(self.manifest))
@@ -120,7 +120,7 @@ class ReferenceImportTests(unittest.TestCase):
         self.assertEqual(len(objects), 4)
         self.assertTrue(params["reference"].startswith("gs://test-workbench-bucket/references/megares/0.0.0/"))
         self.assertTrue(params["annotations"].endswith("/annotations.csv"))
-        self.assertEqual(calls[0], ["wb", "resource", "resolve", "--name=nf-scratch"])
+        self.assertEqual(calls[0], ["wb", "resource", "resolve", "--name=nf-data"])
 
     def test_existing_different_object_is_not_treated_as_success(self):
         path = self.root / "data"

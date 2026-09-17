@@ -56,11 +56,11 @@ into an existing bucket resource:
 ```sh
 python3 reference-databases/import_reference.py upload \
   --directory /tmp/megares-3.0.0 \
-  --bucket-resource nf-scratch
+  --bucket-resource nf-data
 ```
 
 This command performs the cloud writes. It resolves the resource using
-`wb resource resolve --name=nf-scratch`, rechecks the local pair against the
+`wb resource resolve --name=nf-data`, rechecks the local pair against the
 manifest and receipt, then uploads under:
 
 ```text
@@ -98,7 +98,7 @@ The `docker` profile supplies Python using `python:3.12-slim`.
 For the imported MEGARes database, use the generated parameters:
 
 ```sh
-export NF_WORK_BUCKET="$(wb resource resolve --name=nf-scratch | xargs)"
+export NF_WORK_BUCKET="$(wb resource resolve --name=nf-data | xargs)"
 
 wb nextflow run reference-databases/main.nf -profile workbench \
   -params-file /tmp/megares-3.0.0/params.workbench.json
