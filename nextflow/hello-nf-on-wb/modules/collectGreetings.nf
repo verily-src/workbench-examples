@@ -4,6 +4,7 @@
 // workbench profile, params.outdir is a gs:// path so results land in the
 // workspace bucket.
 process collectGreetings {
+    container 'debian:12-slim'
     publishDir "${params.outdir}", mode: 'copy'
 
     input:

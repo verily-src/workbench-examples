@@ -4,6 +4,7 @@
 // is where the pipeline fans out -- on the workbench profile each becomes an
 // independent Google Batch job.
 process sayHello {
+    container 'debian:12-slim'
     tag "${greeting}"
 
     input:

@@ -2,6 +2,7 @@
 
 // Uppercase one greeting file. Runs in parallel across all greetings.
 process convertToUpper {
+    container 'debian:12-slim'
     tag "${input_file}"
 
     input:
