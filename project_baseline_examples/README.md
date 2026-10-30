@@ -18,7 +18,7 @@ which describes the tables and the coding details that matter (for example, mult
 - A workspace with the **Project Baseline Health Study (Limited Tier)** data collection added. This creates
   the `screener`, `crf`, `analysis`, `externallab`, and other BigQuery resources the examples look up with
   `wb resolve`.
-- A bucket resource for saving results. The examples use one named `uploads`; change
+- A bucket resource for saving results. The examples use one named `shared-work`; change
   `OUTPUT_BUCKET_RESOURCE` to match your workspace.
 
 ## Notes

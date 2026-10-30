@@ -80,9 +80,9 @@ fluticasone (about 11 each).
 
 ### 6. Save it
 
-> Save the cohort as a CSV, along with the SQL that defines it, to the uploads bucket.
+> Save the cohort as a CSV, along with the SQL that defines it, to the shared-work bucket.
 
-**Expect:** the files appear in the workspace bucket (check in the Resources tab). Change `uploads` to
+**Expect:** the files appear in the workspace bucket (check in the Resources tab). Change `shared-work` to
 whichever bucket resource your workspace has.
 
 ## If an answer looks wrong
