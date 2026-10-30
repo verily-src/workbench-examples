@@ -25,5 +25,8 @@ which describes the tables and the coding details that matter (for example, mult
 
 - Baseline participants are adults (18-92 at enrollment).
 - The eligibility criteria are hypothetical and for illustration only.
+- The Python notebook's first cell upgrades `google-api-core` / `google-cloud-bigquery` if the app image
+  ships mismatched versions (symptom: `AttributeError: module 'google.api_core' has no attribute
+  'check_python_version'`). If it installs anything, restart the kernel and rerun from the top.
 - Notebooks are committed without outputs. Run them in a workspace with access to the data collection to
   see results.
